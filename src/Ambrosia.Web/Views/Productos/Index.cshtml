@@ -1,0 +1,63 @@
+@model List<Producto>
+@{
+    ViewData["Title"] = "Productos";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0">🍔 Productos y recetas</h1>
+    <a class="btn btn-fuego" asp-action="Crear">➕ Nuevo producto</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-8 col-md-4">
+        <select name="categoriaId" class="form-select" asp-items="ViewBag.Categorias">
+            <option value="">Todas las categorías</option>
+        </select>
+    </div>
+    <div class="col-4 col-md-2"><button class="btn btn-dark w-100">Filtrar</button></div>
+</form>
+
+<div class="table-responsive shadow-sm rounded">
+    <table class="table table-striped table-hover align-middle mb-0 bg-white">
+        <thead class="table-dark">
+            <tr>
+                <th>Producto</th>
+                <th class="d-none d-md-table-cell">Categoría</th>
+                <th class="text-end">Precio</th>
+                <th class="text-end d-none d-sm-table-cell">Costo receta</th>
+                <th class="text-end d-none d-sm-table-cell">Margen</th>
+                <th>Carta</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model)
+            {
+                <tr class="@(p.Disponible ? "" : "table-secondary")">
+                    <td>
+                        <div class="fw-semibold">@p.Nombre</div>
+                        <div class="small text-muted">@p.Receta.Count ingrediente(s)</div>
+                    </td>
+                    <td class="d-none d-md-table-cell">@p.Categoria?.Icono @p.Categoria?.Nombre</td>
+                    <td class="text-end">@p.Precio.ComoPesos()</td>
+                    <td class="text-end d-none d-sm-table-cell">@p.CostoReceta.ComoPesos()</td>
+                    <td class="text-end d-none d-sm-table-cell">
+                        <span class="badge @(p.MargenPorcentaje >= 60 ? "bg-success" : p.MargenPorcentaje >= 45 ? "bg-warning text-dark" : "bg-danger")">@p.MargenPorcentaje.ComoNumero(1) %</span>
+                    </td>
+                    <td>
+                        <form asp-action="CambiarDisponibilidad" asp-route-id="@p.Id" method="post">
+                            <button class="btn btn-sm @(p.Disponible ? "btn-outline-success" : "btn-outline-secondary")" title="Mostrar u ocultar en la carta">
+                                @(p.Disponible ? "Visible" : "Oculto")
+                            </button>
+                        </form>
+                    </td>
+                    <td class="text-nowrap">
+                        <a class="btn btn-sm btn-outline-dark" asp-action="Detalle" asp-route-id="@p.Id">Receta</a>
+                        <a class="btn btn-sm btn-outline-secondary" asp-action="Editar" asp-route-id="@p.Id">Editar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<p class="small text-muted mt-2">El margen compara el precio de venta con el costo de los insumos de la receta.</p>

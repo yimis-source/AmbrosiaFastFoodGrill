@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <!-- Clave del diseño responsive: el ancho de la página es el ancho del dispositivo -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1f1a17" />
+    <title>@ViewData["Title"] · Ambrosía Fast Food & Grill</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Cabecera", required: false)
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark barra-ambrosia shadow-sm">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-controller="Home" asp-action="Index">
+                    <span class="marca-icono">🔥</span>
+                    <span class="lh-1">
+                        <span class="marca-nombre">Ambrosía</span><br />
+                        <small class="marca-lema">Fast Food &amp; Grill</small>
+                    </span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal"
+                        aria-controls="menuPrincipal" aria-expanded="false" aria-label="Abrir menú">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="menuPrincipal">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">📜 Carta</a></li>
+
+                        @if (User.IsInRole(Roles.Administrador) || User.IsInRole(Roles.Cajero))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Pedidos" asp-action="Crear">➕ Nuevo pedido</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Pedidos" asp-action="Index">🧾 Pedidos</a></li>
+                        }
+                        @if (User.IsInRole(Roles.Administrador) || User.IsInRole(Roles.Cocina))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Cocina" asp-action="Index">👨‍🍳 Cocina</a></li>
+                        }
+                        @if (User.IsInRole(Roles.Administrador))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="menuAdmin" role="button" data-bs-toggle="dropdown" aria-expanded="false">⚙️ Administración</a>
+                                <ul class="dropdown-menu" aria-labelledby="menuAdmin">
+                                    <li><a class="dropdown-item" asp-controller="Reportes" asp-action="Index">📊 Reportes de ventas</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" asp-controller="Productos" asp-action="Index">🍔 Productos y recetas</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Categorias" asp-action="Index">🗂️ Categorías</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Insumos" asp-action="Index">📦 Inventario</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" asp-controller="Usuarios" asp-action="Index">👥 Usuarios y roles</a></li>
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        var rol = Roles.Todos.FirstOrDefault(r => User.IsInRole(r)) ?? "Sin rol";
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="text-white-50 small">👤 <strong class="text-white">@User.Identity.Name</strong></span>
+                            <span class="badge rounded-pill bg-mostaza">@rol</span>
+                            <form asp-controller="Cuenta" asp-action="Salir" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-light">Salir</button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <a class="btn btn-fuego btn-sm" asp-controller="Cuenta" asp-action="Login">Iniciar sesión</a>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container py-3 py-md-4" role="main">
+        <partial name="_Mensajes" />
+        @RenderBody()
+    </main>
+
+    <footer class="pie-ambrosia text-center small py-3 mt-4">
+        Ambrosía Fast Food &amp; Grill · Hamburguesas con carne de ampolleta y salsa BBQ de ajo · Asados a la parrilla
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

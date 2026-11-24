@@ -1,0 +1,94 @@
+/* ==========================================================================
+   Ambrosía Fast Food & Grill — estilos propios sobre Bootstrap 5
+   Paleta: carbón (parrilla), fuego, mostaza y crema.
+   ========================================================================== */
+:root {
+    --carbon: #1f1a17;
+    --carbon-2: #2c2420;
+    --fuego: #e8590c;
+    --fuego-oscuro: #c2410c;
+    --mostaza: #f4b400;
+    --crema: #fff8ef;
+}
+
+html { font-size: 15px; scroll-behavior: smooth; }
+@media (min-width: 768px) { html { font-size: 16px; } }
+
+body {
+    background: var(--crema);
+    color: var(--carbon);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+main { flex: 1 0 auto; }
+
+/* Oculta el resumen de validación cuando no hay errores */
+.validation-summary-valid { display: none; }
+
+/* ---------- Barra superior ---------- */
+.barra-ambrosia { background: linear-gradient(90deg, var(--carbon), var(--carbon-2)); }
+.marca-icono { font-size: 1.8rem; }
+.marca-nombre { font-weight: 800; letter-spacing: .04em; font-size: 1.25rem; text-transform: uppercase; }
+.marca-lema { color: var(--mostaza); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
+.pie-ambrosia { background: var(--carbon); color: rgba(255, 255, 255, .6); }
+
+/* ---------- Botones y colores de marca ---------- */
+.btn-fuego { background: var(--fuego); border-color: var(--fuego); color: #fff; }
+.btn-fuego:hover, .btn-fuego:focus { background: var(--fuego-oscuro); border-color: var(--fuego-oscuro); color: #fff; }
+.btn-mostaza { background: var(--mostaza); border-color: var(--mostaza); color: var(--carbon); }
+.btn-mostaza:hover { background: #dba200; color: var(--carbon); }
+.bg-mostaza { background: var(--mostaza) !important; color: var(--carbon) !important; }
+.bg-fuego { background: var(--fuego) !important; color: #fff !important; }
+
+/* ---------- Carta ---------- */
+.portada {
+    background:
+        radial-gradient(circle at 85% 20%, rgba(244, 180, 0, .35), transparent 45%),
+        linear-gradient(135deg, var(--carbon) 0%, #3b1f10 60%, var(--fuego-oscuro) 100%);
+}
+.titulo-seccion { border-left: 5px solid var(--fuego); padding-left: .6rem; font-weight: 700; }
+.tarjeta-producto { border: 0; border-radius: 1rem; box-shadow: 0 2px 10px rgba(31, 26, 23, .08); transition: transform .15s; }
+.tarjeta-producto:hover { transform: translateY(-2px); }
+.tarjeta-producto .precio { color: var(--fuego-oscuro); font-weight: 800; }
+.agotado { opacity: .55; }
+
+/* Categorías desplazables horizontalmente en pantallas pequeñas */
+.categorias-scroll { display: flex; flex-wrap: wrap; }
+@media (max-width: 575.98px) {
+    .categorias-scroll { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: .25rem; }
+    .categorias-scroll .btn { flex: 0 0 auto; }
+}
+
+/* ---------- Nuevo pedido ---------- */
+.fila-producto.seleccionado { background: #fff3e6; border-left: 4px solid var(--fuego); }
+.selector-cantidad { width: 8.2rem; flex: 0 0 auto; }
+.selector-cantidad .form-control { -moz-appearance: textfield; }
+.selector-cantidad .form-control::-webkit-outer-spin-button,
+.selector-cantidad .form-control::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.selector-cantidad .btn { min-width: 2.4rem; font-weight: 700; }
+
+@media (min-width: 992px) {
+    .resumen-pedido { position: sticky; top: 1rem; }
+}
+
+/* Barra inferior fija con el total (celular y tablet) */
+.barra-total {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 1030;
+    background: var(--carbon); padding: .6rem 0; box-shadow: 0 -4px 16px rgba(0, 0, 0, .25);
+}
+/* Espacio al final del formulario para que la barra fija no tape el último producto */
+.espacio-barra-total { height: 5.5rem; }
+
+/* ---------- Cocina ---------- */
+.columna-cocina { padding: .5rem .75rem; border-radius: .6rem; font-weight: 700; }
+.tarjeta-cocina { border-left: 5px solid var(--mostaza); }
+.tarjeta-cocina.primero-cola { border-left-color: var(--fuego); box-shadow: 0 0 0 2px rgba(232, 89, 12, .35) !important; }
+.nota-cocina { color: var(--fuego-oscuro); font-weight: 600; }
+
+/* ---------- Reportes ---------- */
+.kpi { border: 0; border-top: 4px solid var(--fuego); }
+.barra-dia { height: .9rem; border-radius: .5rem; background: linear-gradient(90deg, var(--mostaza), var(--fuego)); min-width: 2px; }
+
+/* ---------- Tablas en blanco sobre fondo crema ---------- */
+.table { --bs-table-bg: #fff; }

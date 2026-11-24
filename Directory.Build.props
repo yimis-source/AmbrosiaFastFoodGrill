@@ -1,0 +1,11 @@
+<Project>
+  <!-- Configuración común para todos los proyectos de la solución -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Permite ejecutar en .NET 9 o 10 si en el equipo no está instalado el runtime de .NET 8 -->
+    <RollForward>Major</RollForward>
+    <Company>Ambrosía Fast Food &amp; Grill</Company>
+    <Product>Sistema de Pedidos e Inventario Ambrosía</Product>
+  </PropertyGroup>
+</Project>

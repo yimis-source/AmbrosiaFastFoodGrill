@@ -1,0 +1,128 @@
+@model ReporteVentas
+@{
+    ViewData["Title"] = "Reportes";
+    var alertas = ViewBag.Alertas as List<Insumo> ?? new List<Insumo>();
+    var maximoDia = Model.VentasPorDia.Values.Select(v => v.Total).DefaultIfEmpty(0).Max();
+    var invariante = System.Globalization.CultureInfo.InvariantCulture;
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-0">📊 Reporte de ventas</h1>
+        <div class="text-muted small">Del @Model.Rango.Desde.ToString("dd/MM/yyyy", invariante) al @Model.Rango.Hasta.ToString("dd/MM/yyyy", invariante) · @Model.Rango.TotalDias día(s)</div>
+    </div>
+    <form method="get" class="d-flex flex-wrap gap-2 align-items-end">
+        <div>
+            <label class="form-label small mb-0" for="desde">Desde</label>
+            <input type="date" class="form-control form-control-sm" id="desde" name="desde" value="@Model.Rango.Desde.ToString("yyyy-MM-dd", invariante)" />
+        </div>
+        <div>
+            <label class="form-label small mb-0" for="hasta">Hasta</label>
+            <input type="date" class="form-control form-control-sm" id="hasta" name="hasta" value="@Model.Rango.Hasta.ToString("yyyy-MM-dd", invariante)" />
+        </div>
+        <button class="btn btn-sm btn-dark">Consultar</button>
+    </form>
+</div>
+
+@* ---------------------------------------------------------------- Indicadores *@
+<div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+    <div class="col"><div class="card kpi shadow-sm h-100"><div class="card-body">
+        <div class="small text-muted">Ventas</div><div class="fs-4 fw-bold">@Model.TotalVentas.ComoPesos()</div>
+    </div></div></div>
+    <div class="col"><div class="card kpi shadow-sm h-100"><div class="card-body">
+        <div class="small text-muted">Pedidos</div><div class="fs-4 fw-bold">@Model.NumeroPedidos</div>
+    </div></div></div>
+    <div class="col"><div class="card kpi shadow-sm h-100"><div class="card-body">
+        <div class="small text-muted">Ticket promedio</div><div class="fs-4 fw-bold">@Model.TicketPromedio.ComoPesos()</div>
+    </div></div></div>
+    <div class="col"><div class="card kpi shadow-sm h-100"><div class="card-body">
+        <div class="small text-muted">Cancelados</div><div class="fs-4 fw-bold">@Model.PedidosCancelados</div>
+    </div></div></div>
+</div>
+
+<div class="row g-3">
+    @* ------------------------------------------------------------ Ventas por día (SortedDictionary) *@
+    <div class="col-lg-7">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white fw-semibold">Ventas por día</div>
+            <div class="card-body">
+                @foreach (var (dia, venta) in Model.VentasPorDia)
+                {
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="text-nowrap small" style="width: 5.5rem">@dia.DiaCorto()</div>
+                        <div class="flex-grow-1">
+                            <div class="barra-dia" style="width: @Presentacion.PorcentajeBarra(venta.Total, maximoDia)%"></div>
+                        </div>
+                        <div class="text-end small text-nowrap" style="width: 7.5rem">@venta.Total.ComoPesos() <span class="text-muted">(@venta.Pedidos)</span></div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    @* ------------------------------------------------------------ Más vendidos *@
+    <div class="col-lg-5">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white fw-semibold">🏆 Más vendidos</div>
+            <ol class="list-group list-group-flush list-group-numbered">
+                @foreach (var p in Model.TopProductos)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-semibold">@p.Nombre</div>
+                            <span class="small text-muted">@p.Ingresos.ComoPesos()</span>
+                        </div>
+                        <span class="badge bg-fuego rounded-pill">@p.Unidades</span>
+                    </li>
+                }
+            </ol>
+        </div>
+    </div>
+
+    @* ------------------------------------------------------------ Por método y por tipo (método genérico AgruparTotales) *@
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white fw-semibold">Por método de pago</div>
+            <ul class="list-group list-group-flush">
+                @foreach (var (metodo, total) in Model.PorMetodoPago.OrderByDescending(x => x.Value))
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@Presentacion.IconoPago(metodo) @metodo.Texto()</span><span>@total.ComoPesos()</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white fw-semibold">Por tipo de pedido</div>
+            <ul class="list-group list-group-flush">
+                @foreach (var (tipo, total) in Model.PorTipoPedido.OrderByDescending(x => x.Value))
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@Presentacion.IconoTipo(tipo) @tipo.Texto()</span><span>@total.ComoPesos()</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-12 col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white fw-semibold">⚠️ Insumos más críticos</div>
+            <ul class="list-group list-group-flush">
+                @foreach (var a in alertas)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@a.Nombre</span>
+                        <span class="text-danger small">@a.StockActual.ComoCantidad(a.Unidad) / mín. @a.StockMinimo.ComoCantidad(a.Unidad)</span>
+                    </li>
+                }
+                @if (alertas.Count == 0)
+                {
+                    <li class="list-group-item text-success">Todo el inventario está sobre el mínimo.</li>
+                }
+            </ul>
+            <div class="card-footer bg-white"><a asp-controller="Insumos" asp-action="Index" class="small">Ir al inventario →</a></div>
+        </div>
+    </div>
+</div>

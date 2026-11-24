@@ -1,0 +1,46 @@
+@model Pedido
+@{
+    var ahora = ViewData["Ahora"] as DateTime? ?? DateTime.Now;
+    var posicion = ViewData["Posicion"] as int?;
+    var mostrarListo = ViewData["MostrarListo"] as bool? ?? false;
+    var minutos = Model.MinutosDesdeCreacion(ahora);
+    var esPrimero = posicion == 1;
+}
+
+<div class="card shadow-sm mb-2 tarjeta-cocina @(esPrimero ? "primero-cola" : "")">
+    <div class="card-body py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                @if (posicion is int p)
+                {
+                    <span class="badge rounded-pill bg-dark me-1">#@p</span>
+                }
+                <strong class="fs-5">@Model.Codigo</strong>
+            </div>
+            <span class="fw-bold @Presentacion.ClaseEspera(minutos, Model.MinutosEstimados)">⏱️ @minutos min</span>
+        </div>
+        <div class="small text-muted mb-1">@Presentacion.IconoTipo(Model.Tipo) @Model.Destino · estimado @Model.MinutosEstimados min</div>
+        <ul class="list-unstyled mb-1">
+            @foreach (var d in Model.Detalles)
+            {
+                <li>
+                    <strong>@d.Cantidad×</strong> @d.NombreProducto
+                    @if (!string.IsNullOrEmpty(d.Nota))
+                    {
+                        <div class="small nota-cocina ms-3">📝 @d.Nota</div>
+                    }
+                </li>
+            }
+        </ul>
+        @if (!string.IsNullOrEmpty(Model.Observaciones))
+        {
+            <div class="small text-muted">🗒️ @Model.Observaciones</div>
+        }
+        @if (mostrarListo)
+        {
+            <form asp-action="MarcarListo" asp-route-id="@Model.Id" method="post" class="mt-2">
+                <button class="btn btn-success w-100">✅ Marcar listo</button>
+            </form>
+        }
+    </div>
+</div>

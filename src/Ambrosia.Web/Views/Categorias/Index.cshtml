@@ -1,0 +1,34 @@
+@model List<Categoria>
+@{
+    ViewData["Title"] = "Categorías";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0">🗂️ Categorías de la carta</h1>
+    <a class="btn btn-fuego" asp-action="Crear">➕ Nueva categoría</a>
+</div>
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+    @foreach (var c in Model)
+    {
+        <div class="col">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <h2 class="h5 mb-1">@c.Icono @c.Nombre</h2>
+                        <span class="badge bg-light text-dark border">#@c.Orden</span>
+                    </div>
+                    <p class="small text-muted mb-0">@c.Productos.Count producto(s)</p>
+                </div>
+                <div class="card-footer bg-white d-flex gap-2">
+                    <a class="btn btn-sm btn-outline-secondary" asp-action="Editar" asp-route-id="@c.Id">Editar</a>
+                    <a class="btn btn-sm btn-outline-dark" asp-controller="Productos" asp-action="Index" asp-route-categoriaId="@c.Id">Ver productos</a>
+                    <form asp-action="Eliminar" asp-route-id="@c.Id" method="post" class="ms-auto"
+                          onsubmit="return confirm('¿Eliminar la categoría @c.Nombre?');">
+                        <button class="btn btn-sm btn-outline-danger" disabled="@(c.Productos.Count > 0)">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>

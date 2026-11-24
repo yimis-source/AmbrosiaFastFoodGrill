@@ -1,0 +1,89 @@
+@model PedidosIndexViewModel
+@{
+    ViewData["Title"] = "Pedidos";
+    var ahora = DateTime.Now;
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0">🧾 Pedidos del @Model.Fecha.ToString("dd/MM/yyyy")</h1>
+    <a class="btn btn-fuego" asp-action="Crear">➕ Nuevo pedido</a>
+</div>
+
+@* Filtros (GET): se pueden guardar en favoritos o compartir el enlace *@
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-6 col-md-3">
+        <label class="form-label small mb-1" for="fecha">Fecha</label>
+        <input type="date" class="form-control" id="fecha" name="fecha" value="@Model.Fecha.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-6 col-md-3">
+        <label class="form-label small mb-1" for="estado">Estado</label>
+        <select class="form-select" id="estado" name="estado">
+            <option value="">Todos</option>
+            @foreach (var estado in Extensiones.Valores<EstadoPedido>())
+            {
+                <option value="@estado" selected="@(Model.Estado == estado)">@estado.Texto()</option>
+            }
+        </select>
+    </div>
+    <div class="col-12 col-md-2">
+        <button type="submit" class="btn btn-dark w-100">Filtrar</button>
+    </div>
+    <div class="col-12 col-md-4 text-md-end">
+        <div class="small text-muted">@Model.Pedidos.Count pedido(s)</div>
+        <div class="fs-5 fw-bold">@Model.TotalVendido.ComoPesos() <span class="small fw-normal text-muted">vendidos</span></div>
+    </div>
+</form>
+
+@if (Model.Pedidos.Count == 0)
+{
+    <div class="alert alert-light border">No hay pedidos con esos filtros.</div>
+}
+else
+{
+    @* Computador y tablet horizontal: tabla *@
+    <div class="table-responsive d-none d-md-block shadow-sm rounded">
+        <table class="table table-striped table-hover align-middle mb-0 bg-white">
+            <thead class="table-dark">
+                <tr>
+                    <th>Código</th><th>Hora</th><th>Destino</th><th class="d-none d-lg-table-cell">Productos</th>
+                    <th>Pago</th><th class="text-end">Total</th><th>Estado</th><th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model.Pedidos)
+                {
+                    <tr>
+                        <td class="fw-bold text-nowrap">@p.Codigo</td>
+                        <td>@p.FechaCreacion.ToString("HH:mm")</td>
+                        <td>@Presentacion.IconoTipo(p.Tipo) @p.Destino</td>
+                        <td class="d-none d-lg-table-cell small">@string.Join(", ", p.Detalles.Select(d => $"{d.Cantidad}× {d.NombreProducto}"))</td>
+                        <td class="text-nowrap">@Presentacion.IconoPago(p.MetodoPago) @p.MetodoPago.Texto()</td>
+                        <td class="text-end text-nowrap">@p.Total.ComoPesos()</td>
+                        <td><span class="badge @Presentacion.ClaseEstado(p.Estado)">@p.Estado.Texto()</span></td>
+                        <td><a class="btn btn-sm btn-outline-dark" asp-action="Detalle" asp-route-id="@p.Id">Ver</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @* Celular: tarjetas apiladas *@
+    <div class="d-md-none">
+        @foreach (var p in Model.Pedidos)
+        {
+            <a class="card mb-2 text-decoration-none text-reset shadow-sm" asp-action="Detalle" asp-route-id="@p.Id">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between">
+                        <strong>@p.Codigo</strong>
+                        <span class="badge @Presentacion.ClaseEstado(p.Estado)">@p.Estado.Texto()</span>
+                    </div>
+                    <div class="small text-muted">@p.FechaCreacion.HaceCuanto(ahora) · @Presentacion.IconoTipo(p.Tipo) @p.Destino</div>
+                    <div class="d-flex justify-content-between mt-1">
+                        <span class="small">@p.CantidadUnidades producto(s) · @p.MetodoPago.Texto()</span>
+                        <strong>@p.Total.ComoPesos()</strong>
+                    </div>
+                </div>
+            </a>
+        }
+    </div>
+}

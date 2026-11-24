@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Biblioteca de clases compartida: dominio, acceso a datos (EF Core) y reglas de negocio.
+    La usan la aplicación web (MVC), la de escritorio (WinForms), las pruebas y las comparativas.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Ambrosia.Nucleo</RootNamespace>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Tablas de usuarios y roles de ASP.NET Core Identity sobre EF Core -->
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.11" />
+    <!-- Proveedor SQLite: la base de datos es un archivo, no hay que instalar un servidor -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Las pruebas pueden usar los miembros "internal" (por ejemplo, descontar inventario) -->
+    <InternalsVisibleTo Include="Ambrosia.Pruebas" />
+  </ItemGroup>
+
+</Project>

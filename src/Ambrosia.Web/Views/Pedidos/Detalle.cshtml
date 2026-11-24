@@ -1,0 +1,89 @@
+@model Pedido
+@{
+    ViewData["Title"] = "Pedido " + Model.Codigo;
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-0">Pedido @Model.Codigo</h1>
+        <div class="text-muted small">Registrado el @Model.FechaCreacion.FechaCorta() por <strong>@Model.CreadoPor</strong></div>
+    </div>
+    <span class="badge fs-6 @Presentacion.ClaseEstado(Model.Estado)">@Model.Estado.Texto()</span>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white fw-semibold">Productos</div>
+            <ul class="list-group list-group-flush">
+                @foreach (var d in Model.Detalles)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <div>
+                            <span class="fw-semibold">@d.Cantidad × @d.NombreProducto</span>
+                            <div class="small text-muted">@d.PrecioUnitario.ComoPesos() c/u</div>
+                            @if (!string.IsNullOrEmpty(d.Nota))
+                            {
+                                <div class="small nota-cocina">📝 @d.Nota</div>
+                            }
+                        </div>
+                        <span>@d.Subtotal.ComoPesos()</span>
+                    </li>
+                }
+            </ul>
+            <div class="card-body border-top">
+                <dl class="row mb-0">
+                    <dt class="col-7 fw-normal">Subtotal</dt><dd class="col-5 text-end mb-1">@Model.Subtotal.ComoPesos()</dd>
+                    <dt class="col-7 fw-normal">@Ambrosia.Nucleo.Servicios.FabricaCargos.Para(Model.Tipo).Descripcion</dt>
+                    <dd class="col-5 text-end mb-1">@Model.Cargo.ComoPesos()</dd>
+                    <dt class="col-7 fs-5">Total</dt><dd class="col-5 text-end fs-5 fw-bold mb-0">@Model.Total.ComoPesos()</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <p class="mb-1">@Presentacion.IconoTipo(Model.Tipo) <strong>@Model.Tipo.Texto()</strong></p>
+                <p class="mb-1">@Model.Destino</p>
+                @if (!string.IsNullOrEmpty(Model.Telefono))
+                {
+                    <p class="mb-1">📞 @Model.Telefono</p>
+                }
+                <p class="mb-1">@Presentacion.IconoPago(Model.MetodoPago) @Model.MetodoPago.Texto()</p>
+                @if (!string.IsNullOrEmpty(Model.Observaciones))
+                {
+                    <p class="mb-0 small text-muted">🗒️ @Model.Observaciones</p>
+                }
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-body small">
+                <div class="fw-semibold mb-2">Seguimiento</div>
+                <div>🕐 Registrado: @Model.FechaCreacion.ToString("HH:mm")</div>
+                <div>🔥 En preparación: @(Model.FechaInicioPreparacion?.ToString("HH:mm") ?? "—")</div>
+                <div>✅ Listo: @(Model.FechaListo?.ToString("HH:mm") ?? "—")</div>
+                <div>🛎️ Entregado: @(Model.FechaEntrega?.ToString("HH:mm") ?? "—")</div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2">
+            @if (Model.Estado == EstadoPedido.Listo)
+            {
+                <form asp-action="Entregar" asp-route-id="@Model.Id" method="post">
+                    <button class="btn btn-success btn-lg w-100">🛎️ Marcar como entregado</button>
+                </form>
+            }
+            @if (Model.Estado == EstadoPedido.Pendiente)
+            {
+                <form asp-action="Cancelar" asp-route-id="@Model.Id" method="post"
+                      onsubmit="return confirm('¿Cancelar el pedido @Model.Codigo? Los insumos vuelven al inventario.');">
+                    <button class="btn btn-outline-danger w-100">Cancelar pedido</button>
+                </form>
+            }
+            <a class="btn btn-outline-secondary" asp-action="Index">← Volver a pedidos</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,32 @@
+# Compilación
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+*.user
+*.suo
+*.userprefs
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.DotSettings.user
+
+# Resultados de pruebas
+TestResults/
+*.trx
+
+# Base de datos local (se crea sola al ejecutar)
+*.db
+*.db-shm
+*.db-wal
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Publicación local de la app de escritorio para Wine
+publish/

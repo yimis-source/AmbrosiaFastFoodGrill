@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Consola que mide las alternativas de estructuras de datos consideradas en el proyecto -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Ambrosia.Comparativas</RootNamespace>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ambrosia.Nucleo\Ambrosia.Nucleo.csproj" />
+  </ItemGroup>
+
+</Project>

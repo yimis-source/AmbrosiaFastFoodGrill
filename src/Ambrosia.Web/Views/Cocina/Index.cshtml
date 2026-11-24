@@ -1,0 +1,69 @@
+@model CocinaViewModel
+@{
+    ViewData["Title"] = "Cocina";
+}
+@section Cabecera {
+    @* La pantalla de cocina se actualiza sola cada 30 segundos *@
+    <meta http-equiv="refresh" content="30" />
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-0">👨‍🍳 Cocina</h1>
+        <div class="small text-muted">
+            Actualizado @Model.Ahora.ToString("HH:mm:ss") ·
+            @Model.Cola.Cantidad en cola (~@Model.Cola.MinutosParaVaciar min de trabajo)
+        </div>
+    </div>
+    <form asp-action="TomarSiguiente" method="post">
+        <button class="btn btn-fuego btn-lg" disabled="@Model.Cola.EstaVacia">
+            🔥 Tomar siguiente @(Model.Cola.Siguiente is { } s ? "(" + s.Codigo + ")" : "")
+        </button>
+    </form>
+</div>
+
+<div class="row g-3">
+    @* ------------------------------------------------------------ Cola FIFO *@
+    <div class="col-md-6 col-xl-4">
+        <h2 class="h5 columna-cocina bg-warning text-dark">🕐 En cola <span class="badge bg-dark">@Model.Cola.Cantidad</span></h2>
+        @if (Model.Cola.EstaVacia)
+        {
+            <p class="text-muted small">No hay pedidos esperando. 🎉</p>
+        }
+        @foreach (var pedido in Model.Cola.EnOrden)
+        {
+            var posicion = Model.Cola.PosicionDe(pedido.Id);
+            <partial name="_TarjetaPedido" model="pedido" view-data='new ViewDataDictionary(ViewData) { ["Posicion"] = posicion, ["Ahora"] = Model.Ahora }' />
+        }
+    </div>
+
+    @* ------------------------------------------------------------ En preparación *@
+    <div class="col-md-6 col-xl-4">
+        <h2 class="h5 columna-cocina bg-info text-dark">🔥 En preparación <span class="badge bg-dark">@Model.EnPreparacion.Count</span></h2>
+        @foreach (var pedido in Model.EnPreparacion)
+        {
+            <partial name="_TarjetaPedido" model="pedido" view-data='new ViewDataDictionary(ViewData) { ["Ahora"] = Model.Ahora, ["MostrarListo"] = true }' />
+        }
+    </div>
+
+    @* ------------------------------------------------------------ Listos *@
+    <div class="col-md-12 col-xl-4">
+        <h2 class="h5 columna-cocina bg-success text-white">✅ Listos para entregar <span class="badge bg-dark">@Model.Listos.Count</span></h2>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-1 g-2">
+            @foreach (var pedido in Model.Listos)
+            {
+                <div class="col">
+                    <div class="card border-success shadow-sm h-100">
+                        <div class="card-body py-2">
+                            <div class="d-flex justify-content-between">
+                                <strong>@pedido.Codigo</strong>
+                                <span class="small text-muted">listo @(pedido.FechaListo?.HaceCuanto(Model.Ahora))</span>
+                            </div>
+                            <div class="small">@Presentacion.IconoTipo(pedido.Tipo) @pedido.Destino</div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

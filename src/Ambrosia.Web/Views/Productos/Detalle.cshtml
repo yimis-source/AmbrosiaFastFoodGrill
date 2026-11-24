@@ -1,0 +1,93 @@
+@model ProductoDetalleViewModel
+@{
+    var p = Model.Producto;
+    ViewData["Title"] = p.Nombre;
+    var usados = p.Receta.Select(r => r.InsumoId).ToHashSet();
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-0">@p.Nombre</h1>
+        <div class="text-muted">@p.Categoria?.Icono @p.Categoria?.Nombre · @p.Precio.ComoPesos() · ⏱️ @p.TiempoPreparacionMinutos min</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" asp-action="Editar" asp-route-id="@p.Id">Editar datos</a>
+        <a class="btn btn-outline-dark" asp-action="Index">← Productos</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white fw-semibold">Receta (por unidad vendida)</div>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead><tr><th>Insumo</th><th class="text-end">Cantidad</th><th class="text-end d-none d-sm-table-cell">Costo</th><th></th></tr></thead>
+                    <tbody>
+                        @foreach (var r in p.Receta.OrderBy(r => r.Insumo?.Nombre))
+                        {
+                            <tr>
+                                <td>@r.Insumo?.Nombre</td>
+                                <td class="text-end">@r.Cantidad.ComoCantidad(r.Insumo?.Unidad ?? UnidadMedida.Unidad)</td>
+                                <td class="text-end d-none d-sm-table-cell">@((r.Cantidad * (r.Insumo?.CostoUnitario ?? 0)).ComoPesos())</td>
+                                <td class="text-end">
+                                    <form asp-action="QuitarIngrediente" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@r.Id" />
+                                        <input type="hidden" name="productoId" value="@p.Id" />
+                                        <button class="btn btn-sm btn-outline-danger" title="Quitar">✕</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        @if (p.Receta.Count == 0)
+                        {
+                            <tr><td colspan="4" class="text-muted">Sin ingredientes: este producto no descuenta inventario.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <form asp-action="GuardarIngrediente" method="post" class="card shadow-sm mt-3">
+            <div class="card-body">
+                <div class="fw-semibold mb-2">Agregar o cambiar ingrediente</div>
+                <input type="hidden" name="ProductoId" value="@p.Id" />
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <select name="InsumoId" class="form-select" required>
+                            <option value="">— Insumo —</option>
+                            @foreach (var i in Model.Insumos)
+                            {
+                                <option value="@i.Id">@i.Nombre (@i.Unidad.Abreviatura())@(usados.Contains(i.Id) ? " · ya está" : "")</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-7 col-md-3">
+                        <input type="number" name="Cantidad" class="form-control" step="0.01" min="0.01" placeholder="Cantidad" required />
+                    </div>
+                    <div class="col-5 col-md-3">
+                        <button class="btn btn-fuego w-100">Guardar</button>
+                    </div>
+                </div>
+                <div class="form-text">Si el insumo ya está en la receta, se reemplaza su cantidad.</div>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="fw-semibold mb-2">Rentabilidad por unidad</div>
+                <dl class="row mb-0">
+                    <dt class="col-7 fw-normal">Precio de venta</dt><dd class="col-5 text-end">@p.Precio.ComoPesos()</dd>
+                    <dt class="col-7 fw-normal">Costo de insumos</dt><dd class="col-5 text-end">@p.CostoReceta.ComoPesos()</dd>
+                    <dt class="col-7">Utilidad bruta</dt><dd class="col-5 text-end fw-bold">@((p.Precio - p.CostoReceta).ComoPesos())</dd>
+                    <dt class="col-7">Margen</dt><dd class="col-5 text-end fw-bold">@p.MargenPorcentaje.ComoNumero(1) %</dd>
+                </dl>
+                <div class="progress mt-2" style="height: .6rem;" role="progressbar" aria-label="Margen">
+                    <div class="progress-bar bg-success" style="width: @(Math.Clamp(p.MargenPorcentaje, 0, 100).ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

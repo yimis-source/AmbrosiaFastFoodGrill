@@ -1,0 +1,40 @@
+@model Categoria
+@{
+    ViewData["Title"] = Model.EsNueva ? "Nueva categoría" : "Editar " + Model.Nombre;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <h1 class="h3 mb-3">@ViewData["Title"]</h1>
+        <form asp-action="Guardar" method="post" class="card shadow-sm">
+            <div class="card-body">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <input type="hidden" asp-for="Id" />
+                <div class="mb-3">
+                    <label asp-for="Nombre" class="form-label"></label>
+                    <input asp-for="Nombre" class="form-control" />
+                    <span asp-validation-for="Nombre" class="text-danger small"></span>
+                </div>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label asp-for="Icono" class="form-label">Ícono (emoji)</label>
+                        <input asp-for="Icono" class="form-control" maxlength="8" />
+                    </div>
+                    <div class="col-6">
+                        <label asp-for="Orden" class="form-label">Orden en la carta</label>
+                        <input asp-for="Orden" class="form-control" />
+                        <span asp-validation-for="Orden" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white d-flex gap-2 justify-content-end">
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-fuego">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

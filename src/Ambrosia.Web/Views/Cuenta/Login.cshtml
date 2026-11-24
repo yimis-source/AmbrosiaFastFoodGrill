@@ -1,0 +1,58 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-7 col-lg-5">
+        <div class="card shadow-sm border-0 mt-md-4">
+            <div class="card-body p-4">
+                <div class="text-center mb-3">
+                    <div class="display-6">🔥</div>
+                    <h1 class="h4 mb-0">Ingreso del personal</h1>
+                    <p class="text-muted small">Ambrosía Fast Food &amp; Grill</p>
+                </div>
+
+                <form asp-action="Login" method="post" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+                    <input type="hidden" asp-for="ReturnUrl" />
+
+                    <div class="mb-3">
+                        <label asp-for="Usuario" class="form-label"></label>
+                        <input asp-for="Usuario" class="form-control form-control-lg" autocomplete="username" autofocus />
+                        <span asp-validation-for="Usuario" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Clave" class="form-label"></label>
+                        <input asp-for="Clave" class="form-control form-control-lg" autocomplete="current-password" />
+                        <span asp-validation-for="Clave" class="text-danger small"></span>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input asp-for="Recordarme" class="form-check-input" />
+                        <label asp-for="Recordarme" class="form-check-label"></label>
+                    </div>
+                    <button type="submit" class="btn btn-fuego btn-lg w-100">Entrar</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3 border-0 bg-light">
+            <div class="card-body small">
+                <strong>Usuarios de prueba</strong>
+                <table class="table table-sm mb-0 mt-2">
+                    <thead><tr><th>Usuario</th><th>Contraseña</th><th>Rol</th></tr></thead>
+                    <tbody>
+                        @foreach (var (usuario, clave, rol) in Ambrosia.Nucleo.Datos.InicializadorBaseDatos.UsuariosIniciales)
+                        {
+                            <tr><td><code>@usuario</code></td><td><code>@clave</code></td><td>@rol</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

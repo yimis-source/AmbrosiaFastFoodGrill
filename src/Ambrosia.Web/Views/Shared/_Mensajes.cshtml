@@ -1,0 +1,19 @@
+@* Mensajes que los controladores dejan en TempData después de una acción (patrón Post-Redirect-Get) *@
+@{
+    var tipos = new (string Clave, string Clase, string Icono)[]
+    {
+        ("Exito", "alert-success", "✅"),
+        ("Aviso", "alert-warning", "⚠️"),
+        ("Error", "alert-danger", "⛔")
+    };
+}
+@foreach (var (clave, clase, icono) in tipos)
+{
+    if (TempData[clave] is string mensaje && !string.IsNullOrWhiteSpace(mensaje))
+    {
+        <div class="alert @clase alert-dismissible fade show shadow-sm" role="alert">
+            <span class="me-1">@icono</span> @mensaje
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    }
+}

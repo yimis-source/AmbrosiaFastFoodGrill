@@ -1,0 +1,145 @@
+@using Ambrosia.Nucleo.Servicios
+@model CrearPedidoViewModel
+@{
+    ViewData["Title"] = "Nuevo pedido";
+    var tipos = Extensiones.Valores<TipoPedido>();
+    var pagos = Extensiones.Valores<MetodoPago>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">➕ Nuevo pedido</h1>
+    <a class="btn btn-sm btn-outline-secondary" asp-action="Index">Ver pedidos de hoy</a>
+</div>
+
+<form asp-action="Crear" method="post" id="formPedido"
+      data-porcentaje-mesa="@CargoServicioMesa.Porcentaje.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+      data-tarifa-domicilio="@CargoDomicilio.Tarifa.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+      data-minimo-gratis="@CargoDomicilio.MinimoEnvioGratis.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+
+    <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+
+    <div class="row g-4">
+        @* ------------------------------------------------------------ Productos *@
+        <div class="col-lg-8">
+            <div class="categorias-scroll mb-2">
+                @foreach (var grupo in Model.Grupos)
+                {
+                    <a class="btn btn-sm btn-outline-dark rounded-pill me-2 mb-2" href="#sec-@grupo.Categoria.Id">@grupo.Categoria.Icono @grupo.Categoria.Nombre</a>
+                }
+            </div>
+
+            @foreach (var grupo in Model.Grupos)
+            {
+                <section id="sec-@grupo.Categoria.Id" class="mb-3">
+                    <h2 class="titulo-seccion h5 mb-2">@grupo.Categoria.Icono @grupo.Categoria.Nombre</h2>
+                    <div class="list-group shadow-sm">
+                        @foreach (var producto in grupo.Productos)
+                        {
+                            var agotado = Model.Agotados.Contains(producto.Id);
+                            var cantidad = Model.Cantidades.GetValueOrDefault(producto.Id);
+                            var nota = Model.Notas.GetValueOrDefault(producto.Id);
+                            <div class="list-group-item fila-producto @(agotado ? "agotado" : "")"
+                                 data-id="@producto.Id" data-nombre="@producto.Nombre"
+                                 data-precio="@producto.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold">@producto.Nombre</div>
+                                        <div class="small text-muted">
+                                            @producto.Precio.ComoPesos()
+                                            @if (agotado) { <span class="badge bg-danger ms-1">Agotado</span> }
+                                        </div>
+                                    </div>
+                                    <div class="input-group input-group-sm selector-cantidad">
+                                        <button type="button" class="btn btn-outline-secondary btn-menos" aria-label="Quitar uno" disabled="@agotado">−</button>
+                                        <input type="number" class="form-control text-center campo-cantidad" min="0" max="50"
+                                               name="Cantidades[@producto.Id]" value="@cantidad" aria-label="Cantidad de @producto.Nombre" disabled="@agotado" />
+                                        <button type="button" class="btn btn-fuego btn-mas" aria-label="Agregar uno" disabled="@agotado">+</button>
+                                    </div>
+                                </div>
+                                <input type="text" class="form-control form-control-sm mt-2 campo-nota @(cantidad > 0 ? "" : "d-none")"
+                                       name="Notas[@producto.Id]" value="@nota" maxlength="120"
+                                       placeholder="Nota para cocina (ej.: sin cebolla, término medio)" />
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+        </div>
+
+        @* ------------------------------------------------------------ Datos y resumen *@
+        <div class="col-lg-4">
+            <div class="card shadow-sm resumen-pedido" id="resumen">
+                <div class="card-body">
+                    <h2 class="h5">Datos del pedido</h2>
+
+                    <div class="btn-group w-100 mb-3" role="group" aria-label="Tipo de pedido">
+                        @foreach (var tipo in tipos)
+                        {
+                            var idTipo = "tipo-" + tipo;
+                            <input type="radio" class="btn-check" name="Tipo" id="@idTipo" value="@tipo" checked="@(Model.Tipo == tipo)" />
+                            <label class="btn btn-outline-dark btn-sm" for="@idTipo">@Presentacion.IconoTipo(tipo) @tipo.Texto()</label>
+                        }
+                    </div>
+
+                    <div class="mb-2 solo-mesa">
+                        <label asp-for="Mesa" class="form-label small mb-1">Número de mesa</label>
+                        <input asp-for="Mesa" class="form-control" min="1" max="30" />
+                    </div>
+                    <div class="mb-2 solo-cliente">
+                        <label asp-for="NombreCliente" class="form-label small mb-1"></label>
+                        <input asp-for="NombreCliente" class="form-control" />
+                    </div>
+                    <div class="mb-2 solo-domicilio">
+                        <label asp-for="Direccion" class="form-label small mb-1"></label>
+                        <input asp-for="Direccion" class="form-control" placeholder="Cra 66 # 9-35, barrio" />
+                    </div>
+                    <div class="mb-2 solo-domicilio">
+                        <label asp-for="Telefono" class="form-label small mb-1"></label>
+                        <input asp-for="Telefono" class="form-control" type="tel" placeholder="300 123 4567" />
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="MetodoPago" class="form-label small mb-1"></label>
+                        <select asp-for="MetodoPago" class="form-select">
+                            @foreach (var pago in pagos)
+                            {
+                                <option value="@pago">@Presentacion.IconoPago(pago) @pago.Texto()</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Observaciones" class="form-label small mb-1">Observaciones</label>
+                        <textarea asp-for="Observaciones" class="form-control" rows="2" placeholder="Ej.: cubiertos extra, cliente con afán"></textarea>
+                    </div>
+
+                    <h3 class="h6 border-top pt-3">Resumen</h3>
+                    <ul class="list-unstyled small mb-2" id="listaResumen">
+                        <li class="text-muted">Aún no hay productos.</li>
+                    </ul>
+                    <dl class="row small mb-2">
+                        <dt class="col-6 fw-normal">Subtotal</dt><dd class="col-6 text-end mb-0" id="txtSubtotal">$ 0</dd>
+                        <dt class="col-6 fw-normal" id="txtCargoNombre">Cargo</dt><dd class="col-6 text-end mb-0" id="txtCargo">$ 0</dd>
+                        <dt class="col-6 fs-5">Total</dt><dd class="col-6 text-end fs-5 fw-bold mb-0" id="txtTotal">$ 0</dd>
+                    </dl>
+                    <button type="submit" class="btn btn-fuego btn-lg w-100 d-none d-lg-block">Registrar pedido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="espacio-barra-total d-lg-none"></div>
+
+    @* Barra fija inferior: solo en celulares y tablets (en computador está el botón del resumen) *@
+    <div class="barra-total d-lg-none">
+        <div class="container d-flex align-items-center justify-content-between gap-2">
+            <a href="#resumen" class="text-white text-decoration-none">
+                <span class="small d-block opacity-75"><span id="txtUnidades">0</span> productos · ver datos</span>
+                <strong class="fs-5" id="txtTotalMovil">$ 0</strong>
+            </a>
+            <button type="submit" class="btn btn-mostaza fw-bold">Registrar</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="~/js/pedido.js" asp-append-version="true"></script>
+}

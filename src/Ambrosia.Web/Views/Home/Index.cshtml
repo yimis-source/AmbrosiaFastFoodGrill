@@ -1,0 +1,73 @@
+﻿@model CartaViewModel
+@{
+    ViewData["Title"] = "Carta";
+}
+
+<section class="portada rounded-4 p-4 p-md-5 mb-4 text-white shadow">
+    <div class="row align-items-center g-3">
+        <div class="col-md-8">
+            <p class="text-uppercase small mb-1 opacity-75">Comidas rápidas y asados</p>
+            <h1 class="display-5 fw-bold mb-2">Ambrosía Fast Food &amp; Grill</h1>
+            <p class="lead mb-0">
+                Hamburguesas con carne de <strong>ampolleta de res</strong> y nuestra
+                <strong>salsa BBQ de ajo</strong>, perros, asados a la parrilla y algo frío para acompañar.
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            @if (User.IsInRole(Roles.Administrador) || User.IsInRole(Roles.Cajero))
+            {
+                <a class="btn btn-mostaza btn-lg" asp-controller="Pedidos" asp-action="Crear">➕ Tomar pedido</a>
+            }
+            else if (User.Identity?.IsAuthenticated != true)
+            {
+                <a class="btn btn-outline-light" asp-controller="Cuenta" asp-action="Login">Ingreso del personal</a>
+            }
+        </div>
+    </div>
+</section>
+
+@* Navegación por categorías: en el celular se desplaza horizontalmente *@
+<nav class="categorias-scroll mb-3" aria-label="Categorías de la carta">
+    @foreach (var grupo in Model.Grupos)
+    {
+        <a class="btn btn-sm btn-outline-dark rounded-pill me-2 mb-2" href="#cat-@grupo.Categoria.Id">
+            @grupo.Categoria.Icono @grupo.Categoria.Nombre
+        </a>
+    }
+</nav>
+
+@foreach (var grupo in Model.Grupos)
+{
+    <section id="cat-@grupo.Categoria.Id" class="mb-4">
+        <h2 class="titulo-seccion h4 mb-3">@grupo.Categoria.Icono @grupo.Categoria.Nombre</h2>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+            @foreach (var producto in grupo.Productos)
+            {
+                var agotado = Model.Agotados.Contains(producto.Id);
+                <div class="col">
+                    <article class="card h-100 tarjeta-producto @(agotado ? "agotado" : "")">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <h3 class="h6 fw-bold mb-1">@producto.Nombre</h3>
+                                <span class="precio text-nowrap">@producto.Precio.ComoPesos()</span>
+                            </div>
+                            <p class="small text-muted flex-grow-1 mb-2">@producto.Descripcion</p>
+                            <div class="d-flex justify-content-between align-items-center small">
+                                <span class="text-muted">⏱️ ~@producto.TiempoPreparacionMinutos min</span>
+                                @if (agotado)
+                                {
+                                    <span class="badge bg-danger">Agotado hoy</span>
+                                }
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+@if (Model.Grupos.Count == 0)
+{
+    <div class="alert alert-info">La carta todavía no tiene productos disponibles.</div>
+}
