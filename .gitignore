@@ -30,3 +30,7 @@ Thumbs.db
 
 # Publicación local de la app de escritorio para Wine
 publish/
+
+# Documentos del informe (solo locales); las capturas sí se publican para el README
+docs/*
+!docs/capturas/
