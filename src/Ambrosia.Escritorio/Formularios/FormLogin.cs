@@ -1,13 +1,10 @@
+// Inicio de sesión del escritorio con los mismos usuarios de Identity que la web.
 using Ambrosia.Nucleo.Datos;
 using Ambrosia.Nucleo.Modelos;
 using Ambrosia.Nucleo.Servicios;
 
 namespace Ambrosia.Escritorio.Formularios;
 
-/// <summary>
-/// Inicio de sesión con los MISMOS usuarios de ASP.NET Core Identity que usa la web
-/// (las contraseñas se verifican con el PasswordHasher de Identity).
-/// </summary>
 public class FormLogin : Form
 {
     private readonly TextBox _txtUsuario = new() { Width = 260, Font = Tema.Normal };
@@ -15,11 +12,12 @@ public class FormLogin : Form
     private readonly Label _lblError = new() { AutoSize = true, ForeColor = Color.Firebrick, Font = Tema.Normal, Margin = new Padding(3, 6, 3, 3) };
     private readonly Button _btnEntrar = Tema.BotonPrincipal("Entrar");
 
-    /// <summary>Sesión obtenida al iniciar correctamente (null si se canceló).</summary>
     public SesionUsuario? Sesion { get; private set; }
 
     public FormLogin()
     {
+        AutoScaleDimensions = new SizeF(96F, 96F);
+        AutoScaleMode = AutoScaleMode.Dpi;
         Text = "Ambrosía · Iniciar sesión";
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
@@ -36,17 +34,20 @@ public class FormLogin : Form
             Font = Tema.Titulo,
             ForeColor = Color.White,
             BackColor = Tema.Carbon,
+            UseMnemonic = false,
             TextAlign = ContentAlignment.MiddleCenter,
-            Dock = DockStyle.Top,
-            Height = 70
+            Anchor = AnchorStyles.Left | AnchorStyles.Right,
+            Height = 70,
+            Margin = Padding.Empty
         };
 
         var contenido = new FlowLayoutPanel
         {
             FlowDirection = FlowDirection.TopDown,
             AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
             Padding = new Padding(24, 12, 24, 16),
-            Dock = DockStyle.Top,
+            Margin = Padding.Empty,
             WrapContents = false
         };
         contenido.Controls.Add(Tema.Etiqueta("Usuario"));
@@ -68,11 +69,20 @@ public class FormLogin : Form
             Margin = new Padding(3, 10, 3, 3)
         });
 
-        // El orden de agregado importa con Dock: primero el contenido y luego el encabezado arriba.
-        Controls.Add(contenido);
-        Controls.Add(encabezado);
+        var raiz = new TableLayoutPanel
+        {
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            ColumnCount = 1,
+            RowCount = 2,
+            Location = Point.Empty,
+            Margin = Padding.Empty
+        };
+        raiz.Controls.Add(encabezado, 0, 0);
+        raiz.Controls.Add(contenido, 0, 1);
+        Controls.Add(raiz);
 
-        AcceptButton = _btnEntrar;   // Enter = Entrar
+        AcceptButton = _btnEntrar;
         _btnEntrar.Click += BtnEntrar_Click;
     }
 

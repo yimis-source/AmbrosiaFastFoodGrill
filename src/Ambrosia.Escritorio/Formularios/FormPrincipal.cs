@@ -1,3 +1,4 @@
+// Ventana principal: muestra solo las pestañas permitidas para el rol del usuario.
 using Ambrosia.Escritorio.Controles;
 using Ambrosia.Nucleo.Datos;
 using Ambrosia.Nucleo.Modelos;
@@ -5,7 +6,6 @@ using Ambrosia.Nucleo.Seguridad;
 
 namespace Ambrosia.Escritorio.Formularios;
 
-/// <summary>Ventana principal: muestra solo las pestañas que corresponden al rol del usuario.</summary>
 public class FormPrincipal : Form
 {
     private readonly SesionUsuario _sesion;
@@ -17,6 +17,8 @@ public class FormPrincipal : Form
     public FormPrincipal(SesionUsuario sesion)
     {
         _sesion = sesion;
+        AutoScaleDimensions = new SizeF(96F, 96F);
+        AutoScaleMode = AutoScaleMode.Dpi;
         var rol = Roles.Todos.FirstOrDefault(sesion.TieneRol) ?? "Sin rol";
 
         Text = $"Ambrosía Fast Food & Grill — {sesion.NombreUsuario} ({rol})";
@@ -27,7 +29,6 @@ public class FormPrincipal : Form
         Font = Tema.Normal;
         KeyPreview = true;
 
-        // ---------- Encabezado
         var encabezado = new Panel { Dock = DockStyle.Top, Height = 54, BackColor = Tema.Carbon, Padding = new Padding(12, 0, 12, 0) };
         var titulo = new Label
         {
@@ -35,6 +36,7 @@ public class FormPrincipal : Form
             Font = Tema.Titulo,
             ForeColor = Color.White,
             AutoSize = true,
+            UseMnemonic = false,
             Location = new Point(12, 14)
         };
         var usuario = new Label
@@ -56,12 +58,10 @@ public class FormPrincipal : Form
         encabezado.Controls.Add(derecha);
         encabezado.Controls.Add(titulo);
 
-        // ---------- Barra de estado
         var barraEstado = new StatusStrip();
         barraEstado.Items.Add(_lblEstado);
         MostrarEstado($"Bienvenido, {sesion.NombreUsuario}. Base de datos: {ConfiguracionBaseDatos.RutaPorDefecto}");
 
-        // ---------- Pestañas según el rol
         var esAdmin = sesion.TieneRol(Roles.Administrador);
         var esCajero = esAdmin || sesion.TieneRol(Roles.Cajero);
         var esCocina = esAdmin || sesion.TieneRol(Roles.Cocina);
@@ -77,7 +77,6 @@ public class FormPrincipal : Form
             controlPedidos.Mensaje += (_, texto) => MostrarEstado(texto);
             AgregarPestana("📋 Pedidos", controlPedidos);
 
-            // Cuando la caja registra un pedido, se refresca la lista de pedidos.
             caja.PedidoRegistrado += async (_, _) => await controlPedidos.CargarAsync();
         }
         if (esCocina)
@@ -93,7 +92,6 @@ public class FormPrincipal : Form
             AgregarPestana("📦 Inventario", inventario);
         }
 
-        // Al cambiar de pestaña se recargan los datos (otro usuario pudo cambiar algo desde la web).
         _pestanas.SelectedIndexChanged += async (_, _) =>
         {
             if (_pestanas.SelectedTab is { } pestana && pestana.Controls.Count > 0 && pestana.Controls[0] is IRecargable recargable)
