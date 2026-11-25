@@ -1,3 +1,4 @@
+// Carta del restaurante: categorías, productos y recetas.
 using Ambrosia.Nucleo.Datos;
 using Ambrosia.Nucleo.Excepciones;
 using Ambrosia.Nucleo.Modelos;
@@ -5,19 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ambrosia.Nucleo.Servicios;
 
-/// <summary>Carta del restaurante: categorías, productos y recetas.</summary>
 public class ServicioCatalogo
 {
     private readonly AmbrosiaDbContext _db;
 
     public ServicioCatalogo(AmbrosiaDbContext db) => _db = db;
 
-    // ================================================================== Carta
-
-    /// <summary>
-    /// Productos agrupados por categoría en el orden de la carta (LINQ GroupBy).
-    /// Dentro de cada categoría se ordenan por precio.
-    /// </summary>
     public async Task<List<GrupoMenu>> ObtenerCartaAsync(bool soloDisponibles = true)
     {
         var productos = await _db.Productos
@@ -33,8 +27,6 @@ public class ServicioCatalogo
             .ToList();
     }
 
-    // ================================================================== Categorías
-
     public Task<List<Categoria>> ListarCategoriasAsync() =>
         _db.Categorias
             .Include(c => c.Productos)
@@ -45,7 +37,6 @@ public class ServicioCatalogo
         await _db.Categorias.Include(c => c.Productos).FirstOrDefaultAsync(c => c.Id == id)
         ?? throw new EntidadNoEncontradaException("categoría", id);
 
-    /// <summary>Crea (si Id = 0) o actualiza una categoría.</summary>
     public async Task GuardarCategoriaAsync(Categoria datos)
     {
         var nombre = datos.Nombre.Trim();
@@ -76,8 +67,6 @@ public class ServicioCatalogo
         await _db.SaveChangesAsync();
     }
 
-    // ================================================================== Productos
-
     public async Task<List<Producto>> ListarProductosAsync(int? categoriaId = null)
     {
         IQueryable<Producto> consulta = _db.Productos
@@ -101,7 +90,6 @@ public class ServicioCatalogo
             .FirstOrDefaultAsync(p => p.Id == id)
         ?? throw new EntidadNoEncontradaException("producto", id);
 
-    /// <summary>Crea (si Id = 0) o actualiza los datos generales de un producto.</summary>
     public async Task GuardarProductoAsync(Producto datos)
     {
         var nombre = datos.Nombre.Trim();
@@ -128,7 +116,6 @@ public class ServicioCatalogo
         await _db.SaveChangesAsync();
     }
 
-    /// <summary>Muestra u oculta el producto en la carta (no se borra para conservar el historial de ventas).</summary>
     public async Task<Producto> CambiarDisponibilidadAsync(int id)
     {
         var producto = await ObtenerProductoAsync(id);
@@ -137,9 +124,6 @@ public class ServicioCatalogo
         return producto;
     }
 
-    // ================================================================== Recetas
-
-    /// <summary>Agrega un insumo a la receta; si ya estaba, actualiza la cantidad.</summary>
     public async Task GuardarIngredienteAsync(int productoId, int insumoId, decimal cantidad)
     {
         if (cantidad <= 0)

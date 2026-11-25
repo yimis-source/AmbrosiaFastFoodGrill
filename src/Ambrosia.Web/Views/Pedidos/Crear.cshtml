@@ -19,7 +19,6 @@
     <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
 
     <div class="row g-4">
-        @* ------------------------------------------------------------ Productos *@
         <div class="col-lg-8">
             <div class="categorias-scroll mb-2">
                 @foreach (var grupo in Model.Grupos)
@@ -66,7 +65,6 @@
             }
         </div>
 
-        @* ------------------------------------------------------------ Datos y resumen *@
         <div class="col-lg-4">
             <div class="card shadow-sm resumen-pedido" id="resumen">
                 <div class="card-body">
@@ -128,7 +126,6 @@
 
     <div class="espacio-barra-total d-lg-none"></div>
 
-    @* Barra fija inferior: solo en celulares y tablets (en computador está el botón del resumen) *@
     <div class="barra-total d-lg-none">
         <div class="container d-flex align-items-center justify-content-between gap-2">
             <a href="#resumen" class="text-white text-decoration-none">

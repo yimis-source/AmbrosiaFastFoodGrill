@@ -1,3 +1,4 @@
+// Productos de la carta y sus recetas (solo Administrador).
 using Ambrosia.Nucleo.Excepciones;
 using Ambrosia.Nucleo.Modelos;
 using Ambrosia.Nucleo.Seguridad;
@@ -9,7 +10,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Ambrosia.Web.Controllers;
 
-/// <summary>Administración de la carta: productos y sus recetas.</summary>
 [Authorize(Roles = Roles.Administrador)]
 public class ProductosController : Controller
 {
@@ -70,7 +70,6 @@ public class ProductosController : Controller
         }
     }
 
-    /// <summary>Un solo POST para crear y editar. [Bind] evita que se envíen campos no permitidos (overposting).</summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Guardar([Bind(CamposProducto)] Producto producto)
@@ -105,8 +104,6 @@ public class ProductosController : Controller
             : $"«{producto.Nombre}» se ocultó de la carta.";
         return RedirectToAction(nameof(Index));
     }
-
-    // ------------------------------------------------------------------ Receta
 
     [HttpPost]
     [ValidateAntiForgeryToken]

@@ -1,11 +1,8 @@
+// Datos iniciales: categorías, productos, insumos y recetas de la carta.
 using Ambrosia.Nucleo.Modelos;
 
 namespace Ambrosia.Nucleo.Datos;
 
-/// <summary>
-/// Datos iniciales de Ambrosía Fast Food &amp; Grill: carta, insumos y recetas.
-/// Los precios están en pesos colombianos.
-/// </summary>
 internal static class DatosSemilla
 {
     internal record CategoriaSemilla(string Nombre, string Icono, int Orden);
@@ -25,7 +22,6 @@ internal static class DatosSemilla
         new("Bebidas", "🥤", 5),
     };
 
-    // Algunos insumos arrancan cerca o por debajo del mínimo para que se vean las alertas.
     internal static readonly InsumoSemilla[] Insumos =
     {
         new("Pan brioche", UnidadMedida.Unidad, 60, 20, 1_200),
@@ -59,7 +55,6 @@ internal static class DatosSemilla
 
     internal static readonly ProductoSemilla[] Productos =
     {
-        // ---------- Hamburguesas ----------
         new("Ambrosía Clásica", "Hamburguesas", 22_000, 12,
             "150 g de carne de ampolleta de res, queso mozzarella, lechuga, tomate y nuestra salsa BBQ de ajo en pan brioche.",
             ("Pan brioche", 1), ("Carne de ampolleta molida", 150), ("Queso mozzarella", 30),
@@ -73,7 +68,6 @@ internal static class DatosSemilla
             ("Pan brioche", 1), ("Pechuga de pollo", 160), ("Queso mozzarella", 30),
             ("Lechuga", 15), ("Salsa BBQ de ajo (de la casa)", 20), ("Aceite para freír", 40)),
 
-        // ---------- Perros calientes ----------
         new("Perro Ambrosía", "Perros calientes", 15_000, 8,
             "Salchicha americana, papita ripio, queso gratinado y salsas.",
             ("Pan para perro", 1), ("Salchicha americana", 1), ("Papa ripio", 30),
@@ -83,7 +77,6 @@ internal static class DatosSemilla
             ("Pan para perro", 1), ("Salchicha ranchera", 1), ("Tocineta", 25),
             ("Cebolla", 30), ("Queso mozzarella", 25)),
 
-        // ---------- Asados ----------
         new("Churrasco 300 g", "Asados a la parrilla", 38_000, 20,
             "Corte de res a la parrilla con papa criolla y ensalada fresca.",
             ("Churrasco de res", 300), ("Papa criolla", 150), ("Lechuga", 30), ("Tomate", 40)),
@@ -99,7 +92,6 @@ internal static class DatosSemilla
             ("Churrasco de res", 150), ("Pechuga de pollo", 150), ("Chorizo santarrosano", 2),
             ("Chicharrón", 150), ("Papa criolla", 250), ("Arepa", 2)),
 
-        // ---------- Acompañantes ----------
         new("Papas a la francesa", "Acompañantes", 7_000, 6,
             "Porción de papas crocantes.",
             ("Papa a la francesa precortada", 200), ("Aceite para freír", 40)),
@@ -110,7 +102,6 @@ internal static class DatosSemilla
             "Aros apanados, ideales para acompañar la BBQ de ajo.",
             ("Aros de cebolla congelados", 150), ("Aceite para freír", 40)),
 
-        // ---------- Bebidas ----------
         new("Gaseosa 400 ml", "Bebidas", 4_500, 1, "Bebida gaseosa personal.", ("Gaseosa 400 ml", 1)),
         new("Limonada de coco", "Bebidas", 9_000, 4, "Limonada cremosa con leche de coco.",
             ("Limón", 2), ("Leche de coco", 120)),

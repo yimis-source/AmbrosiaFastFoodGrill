@@ -1,3 +1,4 @@
+// Caja: registrar, consultar, entregar y cancelar pedidos (Administrador y Cajero).
 using Ambrosia.Nucleo.Excepciones;
 using Ambrosia.Nucleo.Modelos;
 using Ambrosia.Nucleo.Seguridad;
@@ -9,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ambrosia.Web.Controllers;
 
-/// <summary>Caja: registrar, consultar, entregar y cancelar pedidos.</summary>
 [Authorize(Roles = Roles.AdministradorOCajero)]
 public class PedidosController : Controller
 {
@@ -22,7 +22,6 @@ public class PedidosController : Controller
         _catalogo = catalogo;
     }
 
-    // GET /Pedidos?estado=Listo&fecha=2026-11-24
     public async Task<IActionResult> Index(EstadoPedido? estado, DateOnly? fecha)
     {
         var dia = fecha ?? DateOnly.FromDateTime(DateTime.Now);
@@ -49,7 +48,6 @@ public class PedidosController : Controller
     {
         if (ModelState.IsValid)
         {
-            // Se escucha el EVENTO StockBajo para avisarle al cajero qué insumos hay que comprar.
             var avisos = new List<string>();
             _pedidos.Inventario.StockBajo += (_, e) => avisos.Add(e.Mensaje);
 
@@ -93,10 +91,6 @@ public class PedidosController : Controller
     public Task<IActionResult> Cancelar(int id) =>
         EjecutarAsync(id, () => _pedidos.CancelarAsync(id), p => $"Pedido {p.Codigo} cancelado; los insumos volvieron al inventario.");
 
-    /// <summary>
-    /// Ejecuta una acción sobre un pedido y muestra el resultado.
-    /// Recibe DELEGADOS (Func) para no repetir el mismo try/catch en cada acción.
-    /// </summary>
     private async Task<IActionResult> EjecutarAsync(int id, Func<Task<Pedido>> accion, Func<Pedido, string> mensaje)
     {
         try

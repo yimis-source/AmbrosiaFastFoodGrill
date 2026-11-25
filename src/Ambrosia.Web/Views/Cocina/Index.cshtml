@@ -3,7 +3,6 @@
     ViewData["Title"] = "Cocina";
 }
 @section Cabecera {
-    @* La pantalla de cocina se actualiza sola cada 30 segundos *@
     <meta http-equiv="refresh" content="30" />
 }
 
@@ -23,7 +22,6 @@
 </div>
 
 <div class="row g-3">
-    @* ------------------------------------------------------------ Cola FIFO *@
     <div class="col-md-6 col-xl-4">
         <h2 class="h5 columna-cocina bg-warning text-dark">🕐 En cola <span class="badge bg-dark">@Model.Cola.Cantidad</span></h2>
         @if (Model.Cola.EstaVacia)
@@ -37,7 +35,6 @@
         }
     </div>
 
-    @* ------------------------------------------------------------ En preparación *@
     <div class="col-md-6 col-xl-4">
         <h2 class="h5 columna-cocina bg-info text-dark">🔥 En preparación <span class="badge bg-dark">@Model.EnPreparacion.Count</span></h2>
         @foreach (var pedido in Model.EnPreparacion)
@@ -46,7 +43,6 @@
         }
     </div>
 
-    @* ------------------------------------------------------------ Listos *@
     <div class="col-md-12 col-xl-4">
         <h2 class="h5 columna-cocina bg-success text-white">✅ Listos para entregar <span class="badge bg-dark">@Model.Listos.Count</span></h2>
         <div class="row row-cols-1 row-cols-md-2 row-cols-xl-1 g-2">

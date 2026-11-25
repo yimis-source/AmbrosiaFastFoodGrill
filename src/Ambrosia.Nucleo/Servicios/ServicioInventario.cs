@@ -1,3 +1,4 @@
+// Inventario: consumo según recetas, existencias, descuentos, compras y alertas (evento StockBajo).
 using Ambrosia.Nucleo.Datos;
 using Ambrosia.Nucleo.Excepciones;
 using Ambrosia.Nucleo.Modelos;
@@ -6,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ambrosia.Nucleo.Servicios;
 
-/// <summary>Datos del evento StockBajo.</summary>
 public class StockBajoEventArgs : EventArgs
 {
     public Insumo Insumo { get; }
@@ -16,23 +16,13 @@ public class StockBajoEventArgs : EventArgs
         $"(mínimo {Insumo.StockMinimo.ComoCantidad(Insumo.Unidad)}). Hay que comprar.";
 }
 
-/// <summary>
-/// Reglas del inventario: cálculo de lo que consume un pedido según las recetas,
-/// verificación de existencias, descuentos, reabastecimiento y alertas.
-/// </summary>
 public class ServicioInventario
 {
     private readonly AmbrosiaDbContext _db;
 
-    /// <summary>
-    /// EVENTO (delegado EventHandler): se dispara cuando un insumo cruza su stock mínimo.
-    /// La web lo muestra como aviso y el escritorio en la barra de estado.
-    /// </summary>
     public event EventHandler<StockBajoEventArgs>? StockBajo;
 
     public ServicioInventario(AmbrosiaDbContext db) => _db = db;
-
-    // ------------------------------------------------------------------ Consultas
 
     public Task<List<Insumo>> ListarAsync() =>
         _db.Insumos.OrderBy(i => i.Nombre).ToListAsync();
@@ -41,11 +31,6 @@ public class ServicioInventario
         await _db.Insumos.FirstOrDefaultAsync(i => i.Id == id)
         ?? throw new EntidadNoEncontradaException("insumo", id);
 
-    /// <summary>
-    /// HashSet con los Id de productos que no se pueden preparar ni una vez porque
-    /// a algún insumo de su receta no le alcanza el stock. La carta pregunta
-    /// agotados.Contains(producto.Id) para cada producto: O(1) por consulta.
-    /// </summary>
     public async Task<HashSet<int>> ObtenerProductosAgotadosAsync()
     {
         var recetas = await _db.RecetaItems.Include(r => r.Insumo).ToListAsync();
@@ -55,16 +40,10 @@ public class ServicioInventario
             .ToHashSet();
     }
 
-    /// <summary>
-    /// Insumos bajo el mínimo, del más crítico al menos crítico.
-    /// PriorityQueue (montículo): la prioridad es el nivel stock/mínimo; el menor sale primero.
-    /// Si solo se piden los "máximo" más urgentes, no hace falta ordenar toda la lista.
-    /// </summary>
     public async Task<List<Insumo>> ObtenerAlertasAsync(int maximo = int.MaxValue)
     {
         var insumos = await _db.Insumos.ToListAsync();
 
-        // El constructor arma el montículo de una vez (O(n)); cada Dequeue cuesta O(log n).
         var cola = new PriorityQueue<Insumo, decimal>(
             insumos.Where(i => i.BajoMinimo).Select(i => (i, i.NivelStock)));
 
@@ -74,14 +53,11 @@ public class ServicioInventario
         return resultado;
     }
 
-    /// <summary>Valor total del inventario en bodega.</summary>
     public async Task<decimal> ValorInventarioAsync()
     {
         var insumos = await _db.Insumos.ToListAsync();
         return insumos.Sum(i => i.ValorEnBodega);
     }
-
-    // ------------------------------------------------------------------ CRUD
 
     public async Task CrearAsync(Insumo insumo)
     {
@@ -112,7 +88,6 @@ public class ServicioInventario
         await _db.SaveChangesAsync();
     }
 
-    /// <summary>Registra una compra: suma la cantidad al stock.</summary>
     public async Task<Insumo> ReabastecerAsync(int id, decimal cantidad)
     {
         if (cantidad <= 0)
@@ -123,13 +98,6 @@ public class ServicioInventario
         return insumo;
     }
 
-    // ------------------------------------------------------------------ Lógica de recetas
-
-    /// <summary>
-    /// Cuánto se necesita de cada insumo para un conjunto de productos.
-    /// Dictionary como ACUMULADOR: varios productos usan el mismo insumo (pan, queso, salsa),
-    /// y con la clave InsumoId se suma en O(1) sin buscar en una lista.
-    /// </summary>
     public static Dictionary<int, decimal> CalcularRequerimientos(IEnumerable<(Producto Producto, int Cantidad)> lineas)
     {
         var requerimientos = new Dictionary<int, decimal>();
@@ -144,7 +112,6 @@ public class ServicioInventario
         return requerimientos;
     }
 
-    /// <summary>Lista de mensajes con los insumos que no alcanzan (vacía si todo alcanza).</summary>
     public static List<string> BuscarFaltantes(
         IReadOnlyDictionary<int, decimal> requerimientos,
         IReadOnlyDictionary<int, Insumo> insumos)
@@ -162,7 +129,6 @@ public class ServicioInventario
         return faltantes;
     }
 
-    /// <summary>Resta del inventario y dispara StockBajo para los insumos que cruzan el mínimo.</summary>
     internal void Descontar(IReadOnlyDictionary<int, decimal> requerimientos, IReadOnlyDictionary<int, Insumo> insumos)
     {
         foreach (var (insumoId, cantidad) in requerimientos)
@@ -175,7 +141,6 @@ public class ServicioInventario
         }
     }
 
-    /// <summary>Devuelve al inventario (por ejemplo, al cancelar un pedido pendiente).</summary>
     internal static void Devolver(IReadOnlyDictionary<int, decimal> requerimientos, IEnumerable<Insumo> insumos)
     {
         foreach (var insumo in insumos)

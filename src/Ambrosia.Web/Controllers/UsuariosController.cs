@@ -1,3 +1,4 @@
+// Cuentas del personal y asignación de roles con UserManager (solo Administrador).
 using Ambrosia.Nucleo.Seguridad;
 using Ambrosia.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +8,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Ambrosia.Web.Controllers;
 
-/// <summary>El administrador crea las cuentas del personal y les asigna un rol (UserManager de Identity).</summary>
 [Authorize(Roles = Roles.Administrador)]
 public class UsuariosController : Controller
 {
@@ -61,7 +61,6 @@ public class UsuariosController : Controller
                 return RedirectToAction(nameof(Index));
             }
 
-            // Identity devuelve los errores (contraseña débil, usuario repetido…).
             foreach (var error in resultado.Errors)
                 ModelState.AddModelError(string.Empty, TraducirError(error));
         }
@@ -91,7 +90,6 @@ public class UsuariosController : Controller
 
     private void CargarRoles() => ViewBag.Roles = new SelectList(Roles.Todos);
 
-    /// <summary>Los mensajes de Identity vienen en inglés; se traducen los más comunes por su código.</summary>
     private static string TraducirError(IdentityError error) => error.Code switch
     {
         "DuplicateUserName" => "Ese nombre de usuario ya existe.",

@@ -1,17 +1,17 @@
+// Pruebas de reglas puras: cargos, transiciones de estado, formatos y agrupaciones.
 using Ambrosia.Nucleo.Modelos;
 using Ambrosia.Nucleo.Servicios;
 using Ambrosia.Nucleo.Utilidades;
 
 namespace Ambrosia.Pruebas;
 
-/// <summary>Reglas de negocio puras: cargos, transiciones de estado, formatos y agrupaciones.</summary>
 public class ReglasTests
 {
     [Theory]
-    [InlineData(TipoPedido.Mesa, 50_000, 5_000)]          // servicio 10 %
-    [InlineData(TipoPedido.ParaLlevar, 50_000, 0)]        // sin cargo
-    [InlineData(TipoPedido.Domicilio, 50_000, 4_000)]     // tarifa fija
-    [InlineData(TipoPedido.Domicilio, 80_000, 0)]         // domicilio gratis desde $ 80.000
+    [InlineData(TipoPedido.Mesa, 50_000, 5_000)]
+    [InlineData(TipoPedido.ParaLlevar, 50_000, 0)]
+    [InlineData(TipoPedido.Domicilio, 50_000, 4_000)]
+    [InlineData(TipoPedido.Domicilio, 80_000, 0)]
     public void Cargo_SegunTipoDePedido(TipoPedido tipo, int subtotal, int cargoEsperado)
     {
         ICalculadorCargo calculador = FabricaCargos.Para(tipo);
@@ -21,16 +21,15 @@ public class ReglasTests
     [Fact]
     public void Polimorfismo_CadaCargoRedefineSuComportamiento()
     {
-        // Lista de la clase BASE con objetos de las subclases (como List<Sensor> en clase).
         var cargos = new List<CalculadorCargo> { new SinCargo(), new CargoServicioMesa(), new CargoDomicilio() };
 
         var valores = new List<decimal>();
         foreach (var cargo in cargos)
-            valores.Add(cargo.Calcular(50_000m));      // se ejecuta el override de cada tipo real
+            valores.Add(cargo.Calcular(50_000m));
 
         Assert.Equal(new List<decimal> { 0m, 5_000m, 4_000m }, valores);
-        Assert.Equal("Sin cargo adicional", cargos[0].Descripcion);          // versión virtual de la base
-        Assert.Equal("Servicio voluntario (10 %)", cargos[1].Descripcion);   // versión redefinida
+        Assert.Equal("Sin cargo adicional", cargos[0].Descripcion);
+        Assert.Equal("Servicio voluntario (10 %)", cargos[1].Descripcion);
     }
 
     [Theory]
@@ -79,8 +78,8 @@ public class ReglasTests
         var rango = new RangoFechas(hoy.AddDays(-2), hoy);
         var pedidos = new List<Pedido>
         {
-            new() { FechaCreacion = DateTime.Now, Total = 30_000 },                 // hoy
-            new() { FechaCreacion = DateTime.Now.AddDays(-2), Total = 10_000 },     // antier
+            new() { FechaCreacion = DateTime.Now, Total = 30_000 },
+            new() { FechaCreacion = DateTime.Now.AddDays(-2), Total = 10_000 },
         };
 
         var porDia = ServicioReportes.VentasPorDia(pedidos, rango);
@@ -98,7 +97,7 @@ public class ReglasTests
 
         var requerimientos = ServicioInventario.CalcularRequerimientos(new[] { (clasica, 2), (doble, 1) });
 
-        Assert.Equal(3m, requerimientos[10]);     // 3 panes
-        Assert.Equal(600m, requerimientos[20]);   // 2×150 + 300 g de carne
+        Assert.Equal(3m, requerimientos[10]);
+        Assert.Equal(600m, requerimientos[20]);
     }
 }

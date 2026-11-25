@@ -1,3 +1,4 @@
+// Punto de entrada del escritorio: crea la base de datos y alterna login y ventana principal.
 using Ambrosia.Escritorio.Formularios;
 using Ambrosia.Nucleo.Datos;
 
@@ -5,13 +6,11 @@ namespace Ambrosia.Escritorio;
 
 internal static class Program
 {
-    /// <summary>Punto de entrada de la aplicación de escritorio.</summary>
     [STAThread]
     private static void Main()
     {
         ApplicationConfiguration.Initialize();
 
-        // 1) Crear la base de datos compartida (la misma que usa la web) si aún no existe.
         try
         {
             using var db = ConfiguracionBaseDatos.CrearContexto();
@@ -24,7 +23,6 @@ internal static class Program
             return;
         }
 
-        // 2) Ciclo de sesión: login → ventana principal → (cerrar sesión) → login…
         while (true)
         {
             using var login = new FormLogin();

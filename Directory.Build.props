@@ -1,5 +1,4 @@
 <Project>
-  <!-- Configuración común para todos los proyectos de la solución -->
   <PropertyGroup>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>

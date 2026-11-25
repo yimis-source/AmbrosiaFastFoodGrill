@@ -1,3 +1,4 @@
+// Crea la base de datos y carga roles, usuarios de prueba, carta y pedidos de ejemplo.
 using Ambrosia.Nucleo.Modelos;
 using Ambrosia.Nucleo.Seguridad;
 using Ambrosia.Nucleo.Servicios;
@@ -6,13 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ambrosia.Nucleo.Datos;
 
-/// <summary>
-/// Crea la base de datos (si no existe) y carga los datos iniciales.
-/// Lo llaman al arrancar tanto la web como el escritorio: el primero que arranque la crea.
-/// </summary>
 public static class InicializadorBaseDatos
 {
-    /// <summary>Usuarios de prueba: (usuario, contraseña, rol).</summary>
     public static readonly (string Usuario, string Clave, string Rol)[] UsuariosIniciales =
     {
         ("admin", "Admin123*", Roles.Administrador),
@@ -22,8 +18,6 @@ public static class InicializadorBaseDatos
 
     public static async Task InicializarAsync(AmbrosiaDbContext db, bool incluirPedidosDeEjemplo = true)
     {
-        // Si el proyecto tiene migraciones (dotnet ef migrations add ...), se aplican;
-        // si no, EF Core crea el esquema directamente a partir del modelo.
         if (db.Database.GetMigrations().Any())
             await db.Database.MigrateAsync();
         else
@@ -35,9 +29,6 @@ public static class InicializadorBaseDatos
             await SembrarNegocioAsync(db, incluirPedidosDeEjemplo);
     }
 
-    // ------------------------------------------------------------------
-    // Roles y usuarios de ASP.NET Core Identity
-    // ------------------------------------------------------------------
     private static async Task SembrarSeguridadAsync(AmbrosiaDbContext db)
     {
         foreach (var rol in Roles.Todos)
@@ -48,8 +39,6 @@ public static class InicializadorBaseDatos
         }
         await db.SaveChangesAsync();
 
-        // Se usa el mismo PasswordHasher de Identity, así estos usuarios pueden iniciar
-        // sesión con SignInManager en la web y con ServicioAutenticacion en el escritorio.
         var hasher = new PasswordHasher<IdentityUser>();
         foreach (var (usuario, clave, rol) in UsuariosIniciales)
         {
@@ -76,9 +65,6 @@ public static class InicializadorBaseDatos
         await db.SaveChangesAsync();
     }
 
-    // ------------------------------------------------------------------
-    // Carta, insumos, recetas y pedidos de ejemplo
-    // ------------------------------------------------------------------
     private static async Task SembrarNegocioAsync(AmbrosiaDbContext db, bool incluirPedidos)
     {
         var categorias = DatosSemilla.Categorias
@@ -124,13 +110,9 @@ public static class InicializadorBaseDatos
         }
     }
 
-    /// <summary>
-    /// Historial de la última semana (para que los reportes tengan datos) y algunos pedidos
-    /// de hoy en distintos estados (para que la cocina tenga cola). No descuentan inventario.
-    /// </summary>
     private static List<Pedido> GenerarPedidosDeEjemplo(List<Producto> productos)
     {
-        var azar = new Random(2026);           // semilla fija: siempre los mismos datos
+        var azar = new Random(2026);
         var ahora = DateTime.Now;
         var hoy = DateOnly.FromDateTime(ahora);
         var pedidos = new List<Pedido>();
@@ -147,7 +129,6 @@ public static class InicializadorBaseDatos
             }
         }
 
-        // Pedidos de hoy: (minutos atrás, estado)
         (int Minutos, EstadoPedido Estado)[] deHoy =
         {
             (150, EstadoPedido.Entregado), (115, EstadoPedido.Entregado), (80, EstadoPedido.Entregado),
@@ -195,7 +176,6 @@ public static class InicializadorBaseDatos
             FechaEntrega = estado == EstadoPedido.Entregado ? fecha.AddMinutes(22) : null
         };
 
-        // Entre 1 y 4 productos distintos (HashSet evita repetir el mismo producto).
         var elegidos = new HashSet<int>();
         var lineas = azar.Next(1, 5);
         while (elegidos.Count < lineas)

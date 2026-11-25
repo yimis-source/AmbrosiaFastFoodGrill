@@ -1,3 +1,4 @@
+// Pedidos del día en el escritorio, con entrega y cancelación.
 using Ambrosia.Nucleo.Datos;
 using Ambrosia.Nucleo.Excepciones;
 using Ambrosia.Nucleo.Modelos;
@@ -6,7 +7,6 @@ using Ambrosia.Nucleo.Utilidades;
 
 namespace Ambrosia.Escritorio.Controles;
 
-/// <summary>Consulta de pedidos del día, con entrega y cancelación.</summary>
 public class ControlPedidos : UserControl, IRecargable
 {
     private readonly DateTimePicker _fecha = new() { Format = DateTimePickerFormat.Short, Width = 130, Font = Tema.Normal };
@@ -20,7 +20,6 @@ public class ControlPedidos : UserControl, IRecargable
     {
         BackColor = Tema.Crema;
 
-        // "Todos" + cada estado. Se usa object porque la lista mezcla un texto con valores del enum.
         _cmbEstado.Items.Add("Todos");
         foreach (var estado in Extensiones.Valores<EstadoPedido>())
             _cmbEstado.Items.Add(estado);
@@ -90,7 +89,6 @@ public class ControlPedidos : UserControl, IRecargable
         }
     }
 
-    /// <summary>Color de la fila según el estado (switch de expresiones).</summary>
     private static Color ColorEstado(EstadoPedido estado) => estado switch
     {
         EstadoPedido.Pendiente => Tema.AmarilloSuave,

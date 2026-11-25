@@ -1,6 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <!-- Consola que mide las alternativas de estructuras de datos consideradas en el proyecto -->
+  <!-- Consola que compara el rendimiento de las estructuras de datos -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>

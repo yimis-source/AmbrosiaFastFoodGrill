@@ -1,5 +1,4 @@
-﻿// Scripts generales de Ambrosía.
-// Cierra automáticamente los mensajes de éxito después de unos segundos.
+﻿// Cierra automáticamente los mensajes de éxito después de unos segundos.
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.alert-success.alert-dismissible').forEach(alerta => {
         setTimeout(() => {

@@ -1,3 +1,4 @@
+// Inventario: insumos, compras y alertas de stock (solo Administrador).
 using Ambrosia.Nucleo.Excepciones;
 using Ambrosia.Nucleo.Modelos;
 using Ambrosia.Nucleo.Seguridad;
@@ -9,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ambrosia.Web.Controllers;
 
-/// <summary>Inventario: insumos, compras (reabastecer) y alertas de stock.</summary>
 [Authorize(Roles = Roles.Administrador)]
 public class InsumosController : Controller
 {

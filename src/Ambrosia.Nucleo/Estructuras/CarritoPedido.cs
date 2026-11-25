@@ -1,31 +1,19 @@
+// Pedido en construcción: Dictionary para no repetir productos y Stack para deshacer.
 using Ambrosia.Nucleo.Modelos;
 
 namespace Ambrosia.Nucleo.Estructuras;
 
-/// <summary>Línea del carrito. Es un record: para "cambiarla" se crea una copia con "with".</summary>
 public record LineaCarrito(int ProductoId, string Nombre, decimal PrecioUnitario, int Cantidad, string? Nota = null)
 {
     public decimal Subtotal => PrecioUnitario * Cantidad;
 }
 
-/// <summary>
-/// Pedido en construcción en la caja, antes de registrarlo.
-///
-/// ESTRUCTURAS USADAS
-/// • Dictionary&lt;int, LineaCarrito&gt;: la clave es el Id del producto. Si el cajero marca
-///   dos veces "Ambrosía Clásica", se encuentra la línea existente en O(1) y se suma la
-///   cantidad, en lugar de recorrer una lista O(n) o crear líneas duplicadas.
-/// • Stack&lt;...&gt; (pila LIFO): historial para el botón "Deshacer". La última acción es la
-///   primera que se revierte, que es exactamente el comportamiento de una pila.
-/// </summary>
 public class CarritoPedido
 {
     private readonly Dictionary<int, LineaCarrito> _lineas = new();
 
-    // Cada acción guarda cómo estaba la línea ANTES de modificarse (null = no existía).
     private readonly Stack<(int ProductoId, LineaCarrito? Anterior)> _historial = new();
 
-    /// <summary>EVENTO: avisa a la interfaz que debe refrescar la vista del carrito.</summary>
     public event EventHandler? Cambiado;
 
     public IReadOnlyCollection<LineaCarrito> Lineas => _lineas.Values;
@@ -36,7 +24,6 @@ public class CarritoPedido
     public bool PuedeDeshacer => _historial.Count > 0;
     public int AccionesEnHistorial => _historial.Count;
 
-    /// <summary>INDEXADOR: carrito[idProducto] devuelve la línea o null.</summary>
     public LineaCarrito? this[int productoId] =>
         _lineas.TryGetValue(productoId, out var linea) ? linea : null;
 
@@ -62,7 +49,6 @@ public class CarritoPedido
         AlCambiar();
     }
 
-    /// <summary>Quita una unidad del producto (si queda en cero, quita la línea).</summary>
     public bool QuitarUno(int productoId)
     {
         if (!_lineas.TryGetValue(productoId, out var actual)) return false;
@@ -77,7 +63,6 @@ public class CarritoPedido
         return true;
     }
 
-    /// <summary>Quita la línea completa del producto.</summary>
     public bool Quitar(int productoId)
     {
         if (!_lineas.Remove(productoId, out var anterior)) return false;
@@ -86,7 +71,6 @@ public class CarritoPedido
         return true;
     }
 
-    /// <summary>Revierte la última acción (Pop de la pila).</summary>
     public bool Deshacer()
     {
         if (_historial.Count == 0) return false;
@@ -101,7 +85,6 @@ public class CarritoPedido
         return true;
     }
 
-    /// <summary>Deja el carrito vacío (después de registrar el pedido). No se puede deshacer.</summary>
     public void Vaciar()
     {
         _lineas.Clear();
@@ -109,7 +92,6 @@ public class CarritoPedido
         AlCambiar();
     }
 
-    /// <summary>Convierte el carrito en los ítems que recibe el servicio de pedidos.</summary>
     public List<ItemSolicitado> ComoItems() =>
         _lineas.Values.Select(l => new ItemSolicitado(l.ProductoId, l.Cantidad, l.Nota)).ToList();
 

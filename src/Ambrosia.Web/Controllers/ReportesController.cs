@@ -1,3 +1,4 @@
+// Panel de ventas por rango de fechas (solo Administrador).
 using Ambrosia.Nucleo.Excepciones;
 using Ambrosia.Nucleo.Modelos;
 using Ambrosia.Nucleo.Seguridad;
@@ -7,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ambrosia.Web.Controllers;
 
-/// <summary>Panel de ventas del administrador.</summary>
 [Authorize(Roles = Roles.Administrador)]
 public class ReportesController : Controller
 {
@@ -20,7 +20,6 @@ public class ReportesController : Controller
         _inventario = inventario;
     }
 
-    // GET /Reportes?desde=2026-11-18&hasta=2026-11-24
     public async Task<IActionResult> Index(DateOnly? desde, DateOnly? hasta)
     {
         RangoFechas rango;

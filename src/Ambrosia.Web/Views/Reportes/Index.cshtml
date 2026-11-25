@@ -24,7 +24,6 @@
     </form>
 </div>
 
-@* ---------------------------------------------------------------- Indicadores *@
 <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
     <div class="col"><div class="card kpi shadow-sm h-100"><div class="card-body">
         <div class="small text-muted">Ventas</div><div class="fs-4 fw-bold">@Model.TotalVentas.ComoPesos()</div>
@@ -41,7 +40,6 @@
 </div>
 
 <div class="row g-3">
-    @* ------------------------------------------------------------ Ventas por día (SortedDictionary) *@
     <div class="col-lg-7">
         <div class="card shadow-sm h-100">
             <div class="card-header bg-white fw-semibold">Ventas por día</div>
@@ -60,7 +58,6 @@
         </div>
     </div>
 
-    @* ------------------------------------------------------------ Más vendidos *@
     <div class="col-lg-5">
         <div class="card shadow-sm h-100">
             <div class="card-header bg-white fw-semibold">🏆 Más vendidos</div>
@@ -79,7 +76,6 @@
         </div>
     </div>
 
-    @* ------------------------------------------------------------ Por método y por tipo (método genérico AgruparTotales) *@
     <div class="col-md-6 col-lg-4">
         <div class="card shadow-sm h-100">
             <div class="card-header bg-white fw-semibold">Por método de pago</div>

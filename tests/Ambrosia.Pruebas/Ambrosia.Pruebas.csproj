@@ -1,6 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <!-- Pruebas unitarias y de integración (xUnit) de la lógica de negocio -->
+  <!-- Pruebas xUnit de la biblioteca Ambrosia.Nucleo -->
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>

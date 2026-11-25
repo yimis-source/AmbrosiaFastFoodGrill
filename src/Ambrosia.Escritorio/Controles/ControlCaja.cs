@@ -1,3 +1,4 @@
+// Caja del escritorio: arma el pedido con CarritoPedido (deshacer con Ctrl+Z) y lo registra.
 using Ambrosia.Nucleo.Datos;
 using Ambrosia.Nucleo.Estructuras;
 using Ambrosia.Nucleo.Excepciones;
@@ -7,16 +8,11 @@ using Ambrosia.Nucleo.Utilidades;
 
 namespace Ambrosia.Escritorio.Controles;
 
-/// <summary>
-/// Punto de venta (caja). Usa CarritoPedido de la biblioteca:
-/// Dictionary para sumar productos repetidos y Stack para el botón Deshacer (Ctrl+Z).
-/// </summary>
 public class ControlCaja : UserControl, IRecargable
 {
     private readonly string _usuario;
     private readonly CarritoPedido _carrito = new();
 
-    // Productos por Id para encontrarlos en O(1) al seleccionar una fila.
     private Dictionary<int, Producto> _productos = new();
     private List<GrupoMenu> _carta = new();
     private HashSet<int> _agotados = new();
@@ -43,10 +39,8 @@ public class ControlCaja : UserControl, IRecargable
 
     private int? _categoriaFiltro;
 
-    /// <summary>Avisos para la barra de estado de la ventana principal.</summary>
     public event EventHandler<string>? Mensaje;
 
-    /// <summary>Se dispara después de registrar un pedido.</summary>
     public event EventHandler<Pedido>? PedidoRegistrado;
 
     public ControlCaja(string usuario)
@@ -55,12 +49,9 @@ public class ControlCaja : UserControl, IRecargable
         BackColor = Tema.Crema;
         ConstruirInterfaz();
 
-        // EVENTO de la biblioteca: cada vez que el carrito cambia se refresca la grilla y el total.
         _carrito.Cambiado += (_, _) => RefrescarCarrito();
         Load += async (_, _) => await CargarAsync();
     }
-
-    // ------------------------------------------------------------------ Interfaz
 
     private void ConstruirInterfaz()
     {
@@ -68,7 +59,6 @@ public class ControlCaja : UserControl, IRecargable
         division.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55));
         division.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45));
 
-        // ---------- Izquierda: carta
         var izquierda = new Panel { Dock = DockStyle.Fill, Padding = new Padding(0, 0, 8, 0) };
         Tema.Columna(_gridProductos, "producto", "Producto", 55);
         Tema.Columna(_gridProductos, "categoria", "Categoría", 25);
@@ -89,7 +79,6 @@ public class ControlCaja : UserControl, IRecargable
         izquierda.Controls.Add(_categorias);
         izquierda.Controls.Add(new Label { Text = "Carta (doble clic para agregar)", Font = Tema.Titulo, Dock = DockStyle.Top, Height = 30 });
 
-        // ---------- Derecha: pedido actual
         var derecha = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 5 };
         derecha.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         derecha.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -172,8 +161,6 @@ public class ControlCaja : UserControl, IRecargable
         return panel;
     }
 
-    // ------------------------------------------------------------------ Datos
-
     public async Task CargarAsync()
     {
         try
@@ -227,8 +214,6 @@ public class ControlCaja : UserControl, IRecargable
         }
     }
 
-    // ------------------------------------------------------------------ Carrito
-
     private void AgregarSeleccionado()
     {
         if (_gridProductos.CurrentRow?.Tag is not int id || !_productos.TryGetValue(id, out var producto))
@@ -267,7 +252,6 @@ public class ControlCaja : UserControl, IRecargable
 
     private void RefrescarTotales()
     {
-        // Polimorfismo: la misma llamada calcula distinto según el tipo de pedido.
         ICalculadorCargo calculador = FabricaCargos.Para(TipoSeleccionado);
         var subtotal = _carrito.Subtotal;
         var cargo = _carrito.EstaVacio ? 0 : calculador.Calcular(subtotal);
@@ -285,8 +269,6 @@ public class ControlCaja : UserControl, IRecargable
         _txtDireccion.Enabled = tipo == TipoPedido.Domicilio;
         _txtTelefono.Enabled = tipo == TipoPedido.Domicilio;
     }
-
-    // ------------------------------------------------------------------ Registrar
 
     private async void BtnRegistrar_Click(object? sender, EventArgs e)
     {
@@ -308,7 +290,7 @@ public class ControlCaja : UserControl, IRecargable
             using var db = ConfiguracionBaseDatos.CrearContexto();
             var inventario = new ServicioInventario(db);
             var avisos = new List<string>();
-            inventario.StockBajo += (_, args) => avisos.Add(args.Mensaje);   // suscripción al EVENTO
+            inventario.StockBajo += (_, args) => avisos.Add(args.Mensaje);
 
             var pedido = await new ServicioPedidos(db, inventario).CrearPedidoAsync(solicitud, _usuario);
 
@@ -322,7 +304,7 @@ public class ControlCaja : UserControl, IRecargable
                 texto += "\n\n⚠ Inventario bajo:\n• " + string.Join("\n• ", avisos);
             Tema.MostrarInfo(texto);
 
-            await CargarAsync();   // actualiza productos agotados
+            await CargarAsync();
         }
         catch (ReglaNegocioException ex)
         {
@@ -338,7 +320,6 @@ public class ControlCaja : UserControl, IRecargable
         }
     }
 
-    /// <summary>Atajo de teclado Ctrl+Z para deshacer (Pop de la pila del carrito).</summary>
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
         if (keyData == (Keys.Control | Keys.Z))

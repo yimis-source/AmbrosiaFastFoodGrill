@@ -1,13 +1,11 @@
+// Pruebas del carrito (Dictionary y Stack) y de la cola de cocina (Queue).
 using Ambrosia.Nucleo.Estructuras;
 using Ambrosia.Nucleo.Modelos;
 
 namespace Ambrosia.Pruebas;
 
-/// <summary>Pruebas de las estructuras de datos propias (sin base de datos).</summary>
 public class EstructurasTests
 {
-    // ------------------------------------------------------------------ CarritoPedido
-
     [Fact]
     public void Carrito_AgregarMismoProducto_SumaEnUnaSolaLinea()
     {
@@ -15,7 +13,7 @@ public class EstructurasTests
         carrito.Agregar(1, "Ambrosía Clásica", 22_000m, 1);
         carrito.Agregar(1, "Ambrosía Clásica", 22_000m, 2);
 
-        Assert.Equal(1, carrito.CantidadLineas);       // Dictionary: una sola clave
+        Assert.Equal(1, carrito.CantidadLineas);
         Assert.Equal(3, carrito[1]!.Cantidad);
         Assert.Equal(66_000m, carrito.Subtotal);
     }
@@ -28,13 +26,13 @@ public class EstructurasTests
         carrito.Agregar(2, "Gaseosa 400 ml", 4_500m);
         carrito.Agregar(1, "Ambrosía Clásica", 22_000m);
 
-        Assert.True(carrito.Deshacer());                // quita la última acción (+1 clásica)
+        Assert.True(carrito.Deshacer());
         Assert.Equal(1, carrito[1]!.Cantidad);
-        Assert.True(carrito.Deshacer());                // quita la gaseosa
+        Assert.True(carrito.Deshacer());
         Assert.Null(carrito[2]);
-        Assert.True(carrito.Deshacer());                // quita la primera clásica
+        Assert.True(carrito.Deshacer());
         Assert.True(carrito.EstaVacio);
-        Assert.False(carrito.Deshacer());               // pila vacía
+        Assert.False(carrito.Deshacer());
     }
 
     [Fact]
@@ -71,8 +69,6 @@ public class EstructurasTests
         Assert.Throws<ArgumentOutOfRangeException>(() => carrito.Agregar(1, "X", 1_000m, 0));
     }
 
-    // ------------------------------------------------------------------ ColaCocina
-
     [Fact]
     public void ColaCocina_AtiendeEnOrdenDeLlegada()
     {
@@ -88,7 +84,7 @@ public class EstructurasTests
 
         Assert.Equal(1, cola.Siguiente!.Id);
         Assert.Equal(3, cola.PosicionDe(3));
-        Assert.Equal(1, cola.TomarSiguiente()!.Id);      // Dequeue: sale el más antiguo
+        Assert.Equal(1, cola.TomarSiguiente()!.Id);
         Assert.Equal(2, cola.TomarSiguiente()!.Id);
         Assert.Equal(1, cola.Cantidad);
     }
@@ -101,8 +97,6 @@ public class EstructurasTests
         Assert.Null(cola.TomarSiguiente());
         Assert.Null(cola.Siguiente);
     }
-
-    // ------------------------------------------------------------------ RangoFechas (struct)
 
     [Fact]
     public void RangoFechas_FinalAnteriorAlInicio_Lanza()

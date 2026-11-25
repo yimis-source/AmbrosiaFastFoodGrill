@@ -1,3 +1,4 @@
+// Modelos de vista: los datos que recibe y envía cada pantalla web.
 using System.ComponentModel.DataAnnotations;
 using Ambrosia.Nucleo.Estructuras;
 using Ambrosia.Nucleo.Modelos;
@@ -5,9 +6,6 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Ambrosia.Web.Models;
-
-// MODELOS DE VISTA (ViewModels): llevan a cada vista exactamente lo que necesita.
-// [BindNever]/[ValidateNever] marcan datos que solo se muestran y no vienen del formulario.
 
 public class LoginViewModel
 {
@@ -30,7 +28,6 @@ public class CartaViewModel
 {
     public List<GrupoMenu> Grupos { get; set; } = new();
 
-    /// <summary>Productos sin inventario suficiente (HashSet para preguntar Contains en O(1)).</summary>
     public HashSet<int> Agotados { get; set; } = new();
 }
 
@@ -66,13 +63,10 @@ public class CrearPedidoViewModel
     [StringLength(250, ErrorMessage = "Máximo 250 caracteres.")]
     public string? Observaciones { get; set; }
 
-    /// <summary>Cantidad por producto. En el HTML: name="Cantidades[IdProducto]".</summary>
     public Dictionary<int, int> Cantidades { get; set; } = new();
 
-    /// <summary>Nota por producto ("sin cebolla"). En el HTML: name="Notas[IdProducto]".</summary>
     public Dictionary<int, string?> Notas { get; set; } = new();
 
-    /// <summary>Convierte el formulario en la solicitud que entiende la biblioteca.</summary>
     public SolicitudPedido ComoSolicitud() => new()
     {
         Tipo = Tipo,

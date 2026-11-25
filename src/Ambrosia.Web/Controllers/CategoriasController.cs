@@ -1,3 +1,4 @@
+// Administración de las categorías de la carta (solo Administrador).
 using Ambrosia.Nucleo.Excepciones;
 using Ambrosia.Nucleo.Modelos;
 using Ambrosia.Nucleo.Seguridad;
@@ -7,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ambrosia.Web.Controllers;
 
-/// <summary>CRUD de las secciones de la carta.</summary>
 [Authorize(Roles = Roles.Administrador)]
 public class CategoriasController : Controller
 {

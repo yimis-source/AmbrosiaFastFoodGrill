@@ -1,3 +1,4 @@
+// Pantalla de cocina: cola FIFO, tomar el siguiente y marcar listo (Administrador y Cocina).
 using Ambrosia.Nucleo.Excepciones;
 using Ambrosia.Nucleo.Modelos;
 using Ambrosia.Nucleo.Seguridad;
@@ -8,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ambrosia.Web.Controllers;
 
-/// <summary>Pantalla de cocina (pensada para una tablet): cola FIFO, en preparación y listos.</summary>
 [Authorize(Roles = Roles.AdministradorOCocina)]
 public class CocinaController : Controller
 {
@@ -28,7 +28,6 @@ public class CocinaController : Controller
         return View(modelo);
     }
 
-    /// <summary>Dequeue: la cocina toma el primer pedido de la cola.</summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> TomarSiguiente()

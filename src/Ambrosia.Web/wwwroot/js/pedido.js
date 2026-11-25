@@ -1,5 +1,4 @@
 // Pantalla "Nuevo pedido": botones +/−, campos según el tipo de pedido y total en vivo.
-// Las reglas de cargo vienen del servidor (atributos data-*) para no duplicarlas.
 (function () {
     const formulario = document.getElementById('formPedido');
     if (!formulario) return;
@@ -15,7 +14,6 @@
         return marcado ? marcado.value : 'Mesa';
     }
 
-    // Muestra solo los campos que aplican al tipo de pedido.
     function actualizarCampos() {
         const tipo = tipoSeleccionado();
         formulario.querySelectorAll('.solo-mesa').forEach(e => e.classList.toggle('d-none', tipo !== 'Mesa'));

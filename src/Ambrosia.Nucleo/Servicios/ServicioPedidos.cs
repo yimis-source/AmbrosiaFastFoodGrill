@@ -1,3 +1,4 @@
+// Registro de pedidos (valida y descuenta inventario), cambios de estado y cola de cocina.
 using Ambrosia.Nucleo.Datos;
 using Ambrosia.Nucleo.Estructuras;
 using Ambrosia.Nucleo.Excepciones;
@@ -6,15 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ambrosia.Nucleo.Servicios;
 
-/// <summary>
-/// Corazón del negocio: registrar pedidos (validando y descontando inventario),
-/// moverlos por sus estados y alimentar la cola de la cocina.
-/// </summary>
 public class ServicioPedidos
 {
     private readonly AmbrosiaDbContext _db;
 
-    /// <summary>Servicio de inventario que se usa para descontar (y escuchar el evento StockBajo).</summary>
     public ServicioInventario Inventario { get; }
 
     public ServicioPedidos(AmbrosiaDbContext db, ServicioInventario inventario)
@@ -23,21 +19,10 @@ public class ServicioPedidos
         Inventario = inventario;
     }
 
-    // ================================================================== Registrar
-
-    /// <summary>
-    /// Registra un pedido nuevo. Pasos:
-    /// 1) validar datos según el tipo de pedido;
-    /// 2) consolidar productos repetidos (Dictionary);
-    /// 3) calcular insumos necesarios según las recetas y verificar existencias;
-    /// 4) armar el pedido con precios del momento y calcular el cargo (polimorfismo);
-    /// 5) descontar inventario y guardar todo en una sola transacción (SaveChanges).
-    /// </summary>
     public async Task<Pedido> CrearPedidoAsync(SolicitudPedido solicitud, string usuario)
     {
         ValidarSolicitud(solicitud);
 
-        // 2) Consolidar: si el mismo producto viene dos veces, se suman las cantidades.
         var cantidades = new Dictionary<int, int>();
         var notas = new Dictionary<int, string>();
         foreach (var item in solicitud.Items.Where(i => i.Cantidad > 0))
@@ -47,7 +32,6 @@ public class ServicioPedidos
                 notas[item.ProductoId] = item.Nota.Trim();
         }
 
-        // Productos con su receta en un Dictionary para buscarlos por Id en O(1).
         var ids = cantidades.Keys.ToList();
         var productos = await _db.Productos
             .Include(p => p.Receta)
@@ -62,7 +46,6 @@ public class ServicioPedidos
                 throw new ReglaNegocioException($"«{producto.Nombre}» no está disponible en este momento.");
         }
 
-        // 3) Insumos necesarios y verificación de existencias.
         var requerimientos = ServicioInventario.CalcularRequerimientos(
             ids.Select(id => (productos[id], cantidades[id])));
         var insumoIds = requerimientos.Keys.ToList();
@@ -74,7 +57,6 @@ public class ServicioPedidos
         if (faltantes.Count > 0)
             throw new StockInsuficienteException(faltantes);
 
-        // 4) Armar el pedido.
         var pedido = new Pedido
         {
             FechaCreacion = DateTime.Now,
@@ -103,14 +85,12 @@ public class ServicioPedidos
         }
         AplicarTotales(pedido);
 
-        // 5) Descontar inventario y guardar (EF Core guarda todo o nada).
         Inventario.Descontar(requerimientos, insumos);
         _db.Pedidos.Add(pedido);
         await _db.SaveChangesAsync();
         return pedido;
     }
 
-    /// <summary>Calcula subtotal, cargo y total. El cargo depende de la implementación de ICalculadorCargo.</summary>
     public static void AplicarTotales(Pedido pedido)
     {
         ICalculadorCargo calculador = FabricaCargos.Para(pedido.Tipo);
@@ -119,7 +99,6 @@ public class ServicioPedidos
         pedido.Total = pedido.Subtotal + pedido.Cargo;
     }
 
-    /// <summary>Validaciones de la solicitud (pattern matching con "when" y patrones relacionales).</summary>
     public static void ValidarSolicitud(SolicitudPedido solicitud)
     {
         var errores = new List<string>();
@@ -148,9 +127,6 @@ public class ServicioPedidos
             throw new ReglaNegocioException(string.Join(" ", errores));
     }
 
-    // ================================================================== Estados
-
-    /// <summary>Máquina de estados del pedido (switch sobre una tupla).</summary>
     public static bool EsTransicionValida(EstadoPedido actual, EstadoPedido nuevo) => (actual, nuevo) switch
     {
         (EstadoPedido.Pendiente, EstadoPedido.EnPreparacion) => true,
@@ -182,7 +158,6 @@ public class ServicioPedidos
         return pedido;
     }
 
-    /// <summary>Solo se cancela un pedido pendiente (aún no se ha cocinado): el inventario vuelve a bodega.</summary>
     public Task<Pedido> CancelarAsync(int id) => CambiarEstadoAsync(id, EstadoPedido.Cancelado);
 
     public Task<Pedido> MarcarListoAsync(int id) => CambiarEstadoAsync(id, EstadoPedido.Listo);
@@ -207,15 +182,12 @@ public class ServicioPedidos
         ServicioInventario.Devolver(requerimientos, insumos);
     }
 
-    // ================================================================== Consultas
-
     public async Task<Pedido> ObtenerAsync(int id) =>
         await _db.Pedidos
             .Include(p => p.Detalles).ThenInclude(d => d.Producto)
             .FirstOrDefaultAsync(p => p.Id == id)
         ?? throw new EntidadNoEncontradaException("pedido", id);
 
-    /// <summary>Pedidos filtrados por estado y/o día, del más reciente al más antiguo.</summary>
     public async Task<List<Pedido>> ListarAsync(EstadoPedido? estado = null, DateOnly? dia = null)
     {
         IQueryable<Pedido> consulta = _db.Pedidos.Include(p => p.Detalles);
@@ -240,13 +212,9 @@ public class ServicioPedidos
             .OrderBy(p => p.FechaCreacion)
             .ToListAsync();
 
-    // ================================================================== Cocina
-
-    /// <summary>Arma la cola FIFO con los pedidos pendientes (ver ColaCocina).</summary>
     public async Task<ColaCocina> ObtenerColaCocinaAsync() =>
         new ColaCocina(await ListarPorEstadoAsync(EstadoPedido.Pendiente));
 
-    /// <summary>La cocina toma el pedido que sigue en la cola (Dequeue) y lo pasa a preparación.</summary>
     public async Task<Pedido?> TomarSiguienteAsync()
     {
         var cola = await ObtenerColaCocinaAsync();

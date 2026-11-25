@@ -1,3 +1,4 @@
+// Pruebas de integración de los servicios con EF Core y SQLite real.
 using Ambrosia.Nucleo.Excepciones;
 using Ambrosia.Nucleo.Modelos;
 using Ambrosia.Nucleo.Seguridad;
@@ -6,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ambrosia.Pruebas;
 
-/// <summary>Pruebas de integración: servicios + EF Core + SQLite real (archivo temporal).</summary>
 public class ServiciosTests
 {
     private static async Task<int> IdProductoAsync(BaseDatosDePrueba bd, string nombre)
@@ -70,7 +70,7 @@ public class ServiciosTests
     public async Task CrearPedido_SinInventario_LanzaYNoDescuentaNada()
     {
         using var bd = await BaseDatosDePrueba.CrearAsync();
-        var costillas = await IdProductoAsync(bd, "Costillas BBQ");     // 450 g c/u; hay 1.800 g
+        var costillas = await IdProductoAsync(bd, "Costillas BBQ");
         var papaAntes = await StockAsync(bd, "Papa a la francesa precortada");
 
         var error = await Assert.ThrowsAsync<StockInsuficienteException>(() =>
@@ -95,10 +95,10 @@ public class ServiciosTests
     public async Task CrearPedido_CuandoUnInsumoCruzaElMinimo_DisparaElEventoStockBajo()
     {
         using var bd = await BaseDatosDePrueba.CrearAsync();
-        var doble = await IdProductoAsync(bd, "Ambrosía Doble Tocineta");   // 40 g de tocineta; hay 1.000 g, mínimo 800 g
+        var doble = await IdProductoAsync(bd, "Ambrosía Doble Tocineta");
         var avisos = new List<string>();
 
-        await CrearAsync(bd, ParaLlevar(new ItemSolicitado(doble, 6)), avisos);   // quedan 760 g
+        await CrearAsync(bd, ParaLlevar(new ItemSolicitado(doble, 6)), avisos);
 
         Assert.Contains("Tocineta", avisos);
     }
@@ -152,7 +152,6 @@ public class ServiciosTests
 
         var alertas = await new ServicioInventario(db).ObtenerAlertasAsync();
 
-        // Cerveza: 18/24 = 75 %   ·   Costilla: 1.800/2.000 = 90 %
         Assert.Equal(new[] { "Cerveza nacional", "Costilla de cerdo" }, alertas.Select(a => a.Nombre).ToArray());
     }
 

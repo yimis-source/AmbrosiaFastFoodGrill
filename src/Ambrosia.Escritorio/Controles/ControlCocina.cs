@@ -1,3 +1,4 @@
+// Cocina del escritorio: cola FIFO, pedidos en preparación y listos; se refresca sola.
 using Ambrosia.Nucleo.Datos;
 using Ambrosia.Nucleo.Estructuras;
 using Ambrosia.Nucleo.Excepciones;
@@ -7,14 +8,8 @@ using Ambrosia.Nucleo.Utilidades;
 
 namespace Ambrosia.Escritorio.Controles;
 
-/// <summary>
-/// Pantalla de cocina. La columna "En cola" muestra la Queue (FIFO) de la biblioteca:
-/// el botón "Tomar siguiente" siempre saca el pedido más antiguo (Dequeue).
-/// Se actualiza sola cada 15 segundos con un Timer.
-/// </summary>
 public class ControlCocina : UserControl, IRecargable
 {
-    /// <summary>Elemento de un ListBox: muestra el texto y guarda el pedido.</summary>
     private sealed record ItemPedido(Pedido Pedido, string Texto)
     {
         public override string ToString() => Texto;
@@ -132,7 +127,6 @@ public class ControlCocina : UserControl, IRecargable
         }
     }
 
-    /// <summary>Vuelve a llenar la lista conservando el pedido que estaba seleccionado.</summary>
     private static void Llenar(ListBox lista, IEnumerable<ItemPedido> items)
     {
         var idSeleccionado = (lista.SelectedItem as ItemPedido)?.Pedido.Id;

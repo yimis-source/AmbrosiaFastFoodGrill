@@ -1,10 +1,10 @@
+// Reporte de ventas: por día, método de pago, tipo de pedido y productos más vendidos.
 using Ambrosia.Nucleo.Datos;
 using Ambrosia.Nucleo.Modelos;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ambrosia.Nucleo.Servicios;
 
-/// <summary>Indicadores de ventas para el administrador.</summary>
 public class ServicioReportes
 {
     private readonly AmbrosiaDbContext _db;
@@ -16,7 +16,6 @@ public class ServicioReportes
         var inicio = rango.Inicio;
         var fin = rango.FinExclusivo;
 
-        // La base de datos filtra por fechas; los cálculos con dinero se hacen en memoria con LINQ.
         var pedidos = await _db.Pedidos
             .Include(p => p.Detalles)
             .Where(p => p.FechaCreacion >= inicio && p.FechaCreacion < fin)
@@ -38,11 +37,6 @@ public class ServicioReportes
         };
     }
 
-    /// <summary>
-    /// SortedDictionary&lt;DateOnly, VentaDiaria&gt;: mantiene las claves ordenadas al insertar
-    /// (árbol binario balanceado), así el reporte siempre sale en orden cronológico
-    /// sin tener que llamar OrderBy. Los días sin ventas aparecen en cero.
-    /// </summary>
     public static SortedDictionary<DateOnly, VentaDiaria> VentasPorDia(IEnumerable<Pedido> pedidos, RangoFechas rango)
     {
         var porDia = new SortedDictionary<DateOnly, VentaDiaria>();
@@ -58,10 +52,6 @@ public class ServicioReportes
         return porDia;
     }
 
-    /// <summary>
-    /// MÉTODO GENÉRICO: agrupa pedidos por CUALQUIER clave (método de pago, tipo, usuario…)
-    /// y suma sus totales. El delegado Func&lt;Pedido, TClave&gt; dice cuál es la clave.
-    /// </summary>
     public static Dictionary<TClave, decimal> AgruparTotales<TClave>(
         IEnumerable<Pedido> pedidos, Func<Pedido, TClave> selectorClave) where TClave : notnull
     {
@@ -74,7 +64,6 @@ public class ServicioReportes
         return resultado;
     }
 
-    /// <summary>Ranking de productos por unidades vendidas (LINQ: SelectMany + GroupBy).</summary>
     public static List<ProductoVendido> MasVendidos(IEnumerable<Pedido> pedidos, int cuantos) =>
         pedidos
             .SelectMany(p => p.Detalles)

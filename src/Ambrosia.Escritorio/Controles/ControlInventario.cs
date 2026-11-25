@@ -1,3 +1,4 @@
+// Inventario del escritorio: existencias, compras y alertas de stock bajo.
 using Ambrosia.Nucleo.Datos;
 using Ambrosia.Nucleo.Excepciones;
 using Ambrosia.Nucleo.Modelos;
@@ -6,10 +7,6 @@ using Ambrosia.Nucleo.Utilidades;
 
 namespace Ambrosia.Escritorio.Controles;
 
-/// <summary>
-/// Inventario para el administrador: existencias, compras y alertas.
-/// Las alertas salen de una PriorityQueue (la más urgente primero).
-/// </summary>
 public class ControlInventario : UserControl, IRecargable
 {
     private readonly DataGridView _grid = Tema.Grilla();

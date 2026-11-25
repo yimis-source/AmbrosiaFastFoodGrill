@@ -1,9 +1,6 @@
+// Colores, fuentes y controles con el estilo visual de Ambrosía.
 namespace Ambrosia.Escritorio;
 
-/// <summary>
-/// Colores, fuentes y "fábricas" de controles con el estilo de Ambrosía.
-/// Centralizarlo evita repetir las mismas propiedades en cada pantalla.
-/// </summary>
 internal static class Tema
 {
     public static readonly Color Carbon = Color.FromArgb(31, 26, 23);
@@ -50,7 +47,6 @@ internal static class Tema
         Margin = new Padding(3, 8, 3, 2)
     };
 
-    /// <summary>DataGridView de solo lectura, selección por fila y columnas que llenan el ancho.</summary>
     public static DataGridView Grilla()
     {
         var grilla = new DataGridView
@@ -79,7 +75,6 @@ internal static class Tema
         return grilla;
     }
 
-    /// <summary>Agrega una columna de texto a una grilla.</summary>
     public static void Columna(DataGridView grilla, string nombre, string titulo, float peso = 100, bool derecha = false)
     {
         var columna = new DataGridViewTextBoxColumn

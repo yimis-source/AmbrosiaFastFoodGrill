@@ -1,3 +1,4 @@
+// Inicio y cierre de sesión con Identity; cada rol entra a su pantalla principal.
 using Ambrosia.Nucleo.Seguridad;
 using Ambrosia.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -6,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ambrosia.Web.Controllers;
 
-/// <summary>Inicio y cierre de sesión con ASP.NET Core Identity (SignInManager).</summary>
 [AllowAnonymous]
 public class CuentaController : Controller
 {
@@ -42,7 +42,6 @@ public class CuentaController : Controller
             if (!string.IsNullOrEmpty(modelo.ReturnUrl) && Url.IsLocalUrl(modelo.ReturnUrl))
                 return LocalRedirect(modelo.ReturnUrl);
 
-            // Cada rol aterriza en su pantalla principal.
             var usuario = await _usuarios.FindByNameAsync(nombre);
             var roles = usuario is null ? new List<string>() : await _usuarios.GetRolesAsync(usuario);
             return roles switch
